@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+##Load in CodeClan Data and read the drinks_content file
+```{r}
+library(CodeClanData)
+
+drinks_content 
+```
+##Question 1
+Load in the dataset and have a look at it. What are the dimensions, variable types, variable names, etc.?
+
+```{r}
+
+##dimensions of drinks content
+dim(drinks_content)
+
+##names of all the columns
+names(drinks_content)
+
+```
+
+##Question 2
+Let’s first investigate the calories of different drinks. Select the variables Beverage_category, Beverage, Beverage prep and Calories from your data. Since we are interested in the calorie content, check if there are any NA values in the data, and drop them if there are.
+
+```{r}
+drinks_content %>% 
+  ##select the required variables
+  select(Beverage_category, Beverage, Beverage_prep, Calories)
+
+##checked for any NA values in Calories, all entries has numerical value so no need to drop anything
+```
+
+##Question 3
+Create a new variable (column) called calorie_diff, which stores the difference between 135 calories (135 calories = 10 cubes of sugar!) and the calories in each drink. (hint: you’ll want to subtract 135 from the calories to see which drink have more or less than 10 cups of sugar).
+
+```{r}
+drinks_content %>% 
+  ##selected variables to allow for a cleaner summary with calorie diff
+  select(Beverage_category, Beverage, Calories) %>% 
+  ##creates new variable showing the difference between 135 calories and the listed calories for each product
+  mutate(calorie_diff = Calories - 135)
+```
+
+##Question 4
+Summarise the mean number of calories in each beverage_category. Which 3 category of drinks have the most calories? Which 3 drinks have the least? Write a small summary of your findings.
+
+```{r}
+##originally saved output as a value, didn't feel useful
+drinks_content %>% 
+  ##organise the data by beverage category
+  group_by(Beverage_category) %>% 
+  ##identify mean calories in each category
+  summarise(calories_mean = mean(Calories)) %>% 
+  ##arrange the table by highest mean calories
+  arrange(desc(calories_mean)) %>% 
+  ##top 3 drinks categories by calories
+  head(3)
+
+
+##seperate function for calculating which 3 drinks as its drinks not categories
+drinks_content %>% 
+  arrange(desc(Calories)) %>% 
+  tail(3)
+
+##shows 3 teas with 0 calories, tea is good for you!
+
+```
+
+##Question 5
+Let’s look at this a different way. What is the average number of calories in each Beverage_prep type?
+
+```{r}
+
+##same as before however changing the group by to beverage prep instead of beverage category
+##create a variable to make next Question easier
+prep_avg_cal <- drinks_content %>% 
+  group_by(Beverage_prep) %>% 
+  summarise(prep_mean = mean(Calories)) %>% 
+  arrange(desc(prep_mean))
+
+prep_avg_cal
+  
+```
+
+##Question 6
+Which Beverage_prep type contains more than the average calories of all drinks?
+Hint
+: to answer this, you’ll have to first figure out what the average calories across all drinks are, and then use that as a filter for the grouped Beverage_prep data. 
+
+```{r}
+
+drinks_content %>% 
+  ##assign a new column to display the avg calories of 193.8719
+  mutate(avg_cal = mean(Calories))
+
+##use previously created variable to show which beverage prep type contains more than the average calorie count
+prep_avg_cal %>% 
+  filter(prep_mean > 193.8719)
+
+##this became the easiest way to do it instead of trying to use lots of functions at once
+  
+
+
+
+```
+
+
+##Question 7
+Which is the best type of coffee drink (and by ‘drink’ we mean the combination of Beverage_category, Beverage and Beverage_prep) to get if you’re worried about consuming too many calories?
+
+```{r}
+##arrange everything by lowest calorie drink first
+drinks_content %>% 
+  arrange(Calories)
+
+##Using table, can identify that a Short Brewed Coffee would be the best option if you are worried about your calorie intake. 
+
+##this feels to straight forward compared to other questions, let me know if i have missed the mark
+```
+
