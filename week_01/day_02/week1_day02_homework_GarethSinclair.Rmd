@@ -92,6 +92,7 @@ Hint
 
 ```{r}
 
+##my attempt
 drinks_content %>% 
   ##assign a new column to display the avg calories of 193.8719
   mutate(avg_cal = mean(Calories))
@@ -102,8 +103,21 @@ prep_avg_cal %>%
 
 ##this became the easiest way to do it instead of trying to use lots of functions at once
   
+##actual answer
 
+##what are the avg calories of all drinks
+ac_all <- drinks_content %>% 
+  summarise(mean_calories = mean(Calories)) %>% 
+  pull()
 
+##create some summary table that shows the average calories for each beverage prep type
+
+drinks_content %>% 
+  group_by(Beverage_prep) %>% 
+  summarise(mean_cals = mean(Calories)) %>% 
+  ##filter data to show only beverage prep types with more than teh avg nmber of calories
+  filter(mean_cals > ac_all) %>% 
+  arrange(desc(mean_cals))
 
 ```
 
@@ -119,5 +133,10 @@ drinks_content %>%
 ##Using table, can identify that a Short Brewed Coffee would be the best option if you are worried about your calorie intake. 
 
 ##this feels to straight forward compared to other questions, let me know if i have missed the mark
+```
+
+
+```{r}
+
 ```
 
