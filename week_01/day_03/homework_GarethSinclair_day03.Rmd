@@ -49,19 +49,29 @@ Ok, now take your subsetted data movies_selected, and count the number of missin
 ```{r}
 
 ##Struggled with remembering how to do this
-movies_selected %>% 
-  summarise(
-    across(
-      everything(), ~ sum(is.na(movies_selected))
-    )
-  )
+##movies_selected %>% 
+ ## summarise(
+  ##  across(
+  ##    everything(), ~ sum(is.na(movies_selected))
+ ##   )
+##  )
 
 
 #Error Code   You most likely meant: `across(everything(),
  #everything() ~ sum(is.na(movies_selected)))`. 
  # Was missing a comma after everything
 
-  
+# Correct answer after seeing homework answers
+
+movies_selected %>% 
+  summarise(na_runtime = sum(is.na(runtime)),
+            na_title = sum(is.na(title)),
+            na_budget = sum(is.na(budget)))
+
+# OR
+
+movies_selected %>% 
+  summarise(across(.fns = ~sum(is.na(.x))))
 
 
 
@@ -80,6 +90,12 @@ movies_runtime <- movies_selected %>%
 
 movies_runtime %>% 
   count(runtime)
+
+##more correct method from answers
+#this only shows the count of values that are "NA"
+
+movies_runtime %>% 
+  summarise(count = sum(is.na(runtime)))
   
 
 ```
@@ -95,6 +111,11 @@ movies_imputed <- movies_runtime %>%
 
 movies_imputed %>% 
   count(runtime) # shows no Na values in runtime
+
+##again, more efficient count method to only see the results i want
+movies_imputed %>% 
+  summarise(count = sum(is.na(runtime)))
+
   
 ```
 
@@ -156,6 +177,21 @@ movie_budgets <- movies_imputed %>%
 
 # double check the total number of different movies based on budget type
 movie_budgets %>% 
+  count(budget_type)
+
+##slightly different answer from homework, gives different answer so better order than above
+
+movie_budgets2 <- movies_imputed %>% 
+  mutate(
+    budget_type = case_when(
+      budget < 12e6 ~ "Small budget", 
+      budget < 40e6 ~ "Medium budget",
+      budget >= 40e6 ~ "big budget"
+    
+    )
+  )
+
+movie_budgets2 %>% 
   count(budget_type)
 
 ```
