@@ -1,0 +1,132 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(tidyverse)
+library(skimr)
+library(dplyr)
+
+
+# create book data
+
+book_data <- read.csv("data/books.csv")
+
+```
+
+# Now to get some basic info about the data
+
+```{r}
+
+# How much data are we looking at?
+dim(book_data)
+# 11134 Objects over 13 Variables.?
+
+names(book_data)
+view(book_data)
+skim(book_data)
+
+# Drop any NA values
+
+book_data <- book_data %>%
+  mutate(authors = na_if(authors,"NOT A BOOK")) %>% #Added this line after running top10 check
+  drop_na()
+  
+
+# Running this showed no change in number of objects, either no NA's or values are classed differently
+  
+
+# # Creating a variable to store data with the relevant columns we will be using
+# 
+book_data_sm <- book_data %>%
+  select(title, authors, average_rating, language_code, publisher, num_pages, text_reviews_count)
+  
+
+# 
+
+# #create a variable with the top 10 best rated books
+# 
+top10_books <- book_data_sm %>%
+  select(title, authors, average_rating) %>%
+  arrange(desc(average_rating)) %>%
+  slice_head(n = 10)
+
+top10_books
+
+# Checking this identified "NOT A BOOK" author name, need to remove for better answer
+# 
+# 
+# # find out top 10 books that aren't native english language 
+
+
+#remove any english variants from the data set, using count function to check remaining values
+
+top10_noneng <- book_data_sm %>% 
+  filter(
+    language_code != "eng" & 
+      language_code != "en-GB" & 
+      language_code != "en-US" & 
+      language_code != "enm" & 
+      language_code != "en-CA"
+    ) %>% 
+  #count(language_code)
+  select(title, authors, average_rating) %>% 
+  arrange(desc(average_rating)) %>% 
+  slice_head(n = 10)
+
+top10_noneng
+
+# no similarities between the top books in english and non english. 
+# Going to compare if we remove the 5 star rating from english books if we get any non english entries for top 10
+
+book_data_sm %>% 
+  filter(average_rating != 5.00) %>% 
+  arrange(desc(average_rating))
+
+
+# Removing 5 star books, we have one German book that makes it into the top 10
+
+# Lets see what author has written the most pages
+
+most_pages_by_author <- book_data_sm %>% 
+  select(authors, num_pages) %>% 
+  # After running once, Anonymous is included, should be removed
+  filter(authors != "Anonymous") %>% 
+  group_by(authors) %>% 
+  # Taken from stack overflow, couldn't get it working
+  summarise_each(funs(first(na.omit(.)))) %>% 
+  arrange(desc(num_pages)) %>% 
+  slice_head(n = 10)
+
+
+# Which publisher gets the best ratings for their books on average
+
+best_publishers <- book_data_sm %>%
+  filter(average_rating != 0 & text_reviews_count > 50) %>% 
+  select(publisher, average_rating) %>%
+  group_by(publisher) %>% 
+  summarise(average_rating = mean(average_rating)) %>% 
+  arrange(desc(average_rating)) %>% 
+  slice_head(n = 10)
+
+# this first version is biased due to multiple academic books being rated 5 without any actual ratings. 
+# In order to make this more interesting, I will also filter out anything with less than 50 reviews
+  
+
+# Using the same method, see how the top 10 changes if review count matters
+
+
+
+book_data_sm %>%
+  filter(text_reviews_count > 50) %>% 
+  select(title, authors, average_rating, text_reviews_count) %>%
+  arrange(desc(average_rating)) %>%
+  slice_head(n = 10)
+
+# This proves that Calvin & Hobbes is the greatest piece of literature ever written. 
+
+
+```
+
