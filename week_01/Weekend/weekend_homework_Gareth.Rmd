@@ -7,7 +7,7 @@ output: html_notebook
 
 library(tidyverse)
 library(skimr)
-library(dplyr)
+
 
 
 # create book data
@@ -27,6 +27,10 @@ dim(book_data)
 names(book_data)
 view(book_data)
 skim(book_data)
+sum(is.na(book_data)) # Check for how many NA values are in the dataset
+
+book_data %>% 
+  summarise(across(.fns = ~ sum(is.na(.x)))) # breakdown the number of NA's in dataset by column
 
 # Drop any NA values
 
@@ -71,8 +75,8 @@ top10_noneng <- book_data_sm %>%
       language_code != "enm" & 
       language_code != "en-CA"
     ) %>% 
-  #count(language_code)
-  select(title, authors, average_rating) %>% 
+  # count(language_code) # this was used to check what options remained, commented out once all english options were removed
+  select(title, authors, average_rating, language_code) %>% 
   arrange(desc(average_rating)) %>% 
   slice_head(n = 10)
 
@@ -91,13 +95,26 @@ book_data_sm %>%
 # Lets see what author has written the most pages
 
 most_pages_by_author <- book_data_sm %>% 
-  select(authors, num_pages) %>% 
+  select(authors, num_pages) %>%
   # After running once, Anonymous is included, should be removed
   filter(authors != "Anonymous") %>% 
+  separate(col = authors, into = c("primary_author", "supporting_authors"), sep = "/") %>% 
   group_by(authors) %>% 
-  # Taken from stack overflow, couldn't get it working
-  summarise_each(funs(first(na.omit(.)))) %>% 
-  arrange(desc(num_pages)) %>% 
+  summarise(total_pages = sum(num_pages)) %>% 
+  arrange(desc(total_pages)) %>% 
+  slice_head(n = 10)
+
+# Correct way from notes in class
+
+book_data %>%
+  select(authors, num_pages) %>%
+  # will cover separate this afternoon :) 
+  separate(col = authors, into = c("primary_author", "supporting_authors_illustrators"), sep = "/",extra = "merge") %>% 
+  # After running once, Anonymous is included, should be removed
+  filter(primary_author != "Anonymous") %>%
+  group_by(primary_author) %>%
+  summarise(total_pages = sum(num_pages)) %>% 
+  arrange(desc(total_pages)) %>%
   slice_head(n = 10)
 
 

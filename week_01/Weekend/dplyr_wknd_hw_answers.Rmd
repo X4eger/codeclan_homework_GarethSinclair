@@ -1,0 +1,155 @@
+---
+title: "`dplyr` Weekend Homework - Answers"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+    css: ../../../styles.css
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = F)
+```
+
+# Example Answer
+
+Note that this is just an example of what you could have done. Since the task is very open ended there is no correct answer and there are almost definitely more interesting things to comment on in this dataset than the ones below!
+
+```{r, warning = F }
+library(tidyverse)
+books <- read_csv("data/books.csv")
+
+# variable names
+names(books)
+
+# data dimensions
+dim(books)
+
+# how many missing values
+sum(is.na(books))
+
+# how many missing values across columns
+books %>% 
+  summarise(across(.fns = ~ sum(is.na(.x))))
+```
+
+
+```{r}
+# clean names and drop NA's
+books <- books %>% 
+  janitor::clean_names() %>% 
+  drop_na()
+```
+
+
+```{r}
+# descriptive summaries for numeric variables
+books %>% 
+  select_if(is.numeric) %>% 
+  select(-book_id) %>% 
+  psych::describe(fast = TRUE)
+```
+
+
+```{r}
+# how many distinct language codes
+books %>% 
+  distinct(language_code) %>% 
+  nrow()
+
+# how many distinct publishers
+books %>% 
+  distinct(publisher) %>% 
+  nrow()
+
+# how many distinct authors
+books %>% 
+  distinct(authors) %>% 
+  nrow()
+```
+
+
+### Top 5 rated books 
+
+I included only books with more than 1000 ratings, because it's hard to accurately calculate an average with a small amount of data (more on this when we start covering statistics!). Also, books with very few ratings could have a biased average rating (e.g. a book with only a handful of ratings that are all from diehard fans of the author).
+
+```{r}
+books %>% 
+  filter(ratings_count > 1000) %>% 
+  slice_max(average_rating, n = 5)
+
+```
+Only Harry Potter and Calvin & Hobbes make up the top 5 - pretty interesting! 
+
+### Which book has the most text reviews? 
+```{r}
+books %>% 
+  slice_max(text_reviews_count) 
+```
+The book with the most text reviews is *Twilight* by Stephenie Meyer. 
+
+### What about most ratings?
+
+```{r}
+books %>% 
+  slice_max(ratings_count)
+```
+
+*Twilight* by Stephenie Meyer once again!
+
+### Which publisher has published the most books?
+
+```{r}
+books %>% 
+  group_by(publisher) %>% 
+  summarise(n_titles = n()) %>% 
+  arrange(desc(n_titles))
+
+penguin_names <- c("Penguin Books", "Penguin Classics")
+
+books %>% 
+  filter(publisher %in% penguin_names) %>%
+  nrow()
+
+```
+Vintage has the most books in this dataset at 318, however if you combined 'Penguin Books' and 'Penguin Classics' they are the clear winner at 445! So it depends on how you want to count it.
+
+
+### Which publisher has the highest average rating?
+```{r}
+books %>% 
+  filter(ratings_count > 1000) %>% 
+  group_by(publisher) %>% 
+  summarise(mean_rating = mean(average_rating)) %>%
+  arrange(desc(mean_rating))
+```
+Andrews McMeel Publishing has the highest average rating. Seems like they are the publisher of comic strips including - you guessed it - Calvin and Hobbes!
+
+### How many pages is the longest book for each language code?
+```{r}
+# first: recode all english to general category 'eng'
+eng_codes <- c("en-CA", "en-GB", "en-US", "eng")
+
+books %>% 
+  mutate(language_code = if_else(language_code %in% eng_codes, "eng", language_code)) %>% # recoding
+  group_by(language_code) %>% 
+  slice_max(num_pages) %>% 
+  select(language_code, num_pages) %>% 
+  arrange(desc(num_pages))
+
+
+```
+So some of the longest books in this dataset are written in English, German and... 'enm'.
+
+### What is language code 'enm'? And which books belong to it?
+
+From a quick Google search, it seems 'enm' is the language code for Middle English!
+```{r}
+
+books %>% 
+  filter(language_code == "enm")
+
+```
+And it seems like Geoffrey Chaucer is the only author with books of language code 'enm' in this dataset!
