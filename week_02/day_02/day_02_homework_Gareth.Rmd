@@ -38,8 +38,13 @@ cc_tweets %>%
 
 cc_tweets %>% 
   filter(is_quote == FALSE) %>% 
-  mutate(total_favourites = sum(favorite_count)) %>% 
-  count(total_favourites)
+  mutate(total_favourites = sum(favorite_count))
+
+# in this instance, summarise is better as it will leave you with only that column, as so:
+
+cc_tweets %>% 
+  filter(is_quote == FALSE) %>% 
+  summarise(total_favs = sum(favorite_count))
 
 ## Total favorites 425 over 227 tweets that weren't quoted
 
@@ -54,8 +59,8 @@ Summarise the mean number of retweets (retweet_count), split by the type of plat
 cc_tweets %>% 
   filter(is_quote == FALSE) %>% 
   group_by(source) %>% 
-  mutate(avg_retweet = mean(retweet_count)) %>% 
-  count() 
+  summarise(avg_retweet = mean(retweet_count))
+  
   
 
 ```
@@ -70,9 +75,8 @@ cc_tweets %>%
   select(media_type, favorite_count) %>% 
   mutate(media_type = coalesce(media_type, "text")) %>% 
   group_by(media_type) %>%
-  mutate(total_likes = sum(favorite_count)) %>% 
-  arrange(desc(total_likes)) %>% 
-  count(total_likes)
+  summarise(total_likes = sum(favorite_count)) %>% 
+  arrange(desc(total_likes))
 
 ```
 
@@ -82,6 +86,9 @@ Find the mean number of characters that a CodeClan tweet contains. You can eithe
 
 
 ```{r}
+
+
+# This method is not great, do not do this in the future
 
 tweet_text <- cc_tweets %>%
   pull(text)
@@ -95,8 +102,25 @@ mean_tweets <- tweet_text %>%
   mean()
   
  mean_tweets 
+ 
+ 
+ 
+ ## Alternative ways from homework
+ 
+ 
+ # This is useful when you already have the numerical values
+ cc_tweets %>% 
+   summarise(avg_tweet_length = mean(display_text_width))
+ 
+ 
+ # This is for finding the numerical values, this is much nicer and tider method
+ 
+ cc_tweets_txt <- cc_tweets %>% 
+   mutate(count_str_length = str_length(text)) %>% 
+   select(count_str_length, display_text_width)
   
-
+cc_tweets_txt %>% 
+  summarise(avg_tweet_length = mean(count_str_length))
 ```
 
 
@@ -110,7 +134,7 @@ The code_clan_info.csv data file contains status_url along with other info. Load
 
 view(cc_info)
 
-tweets_info <- left_join(cc_tweets, cc_info, by = c("tweet_id"))
+tweets_info <- left_join(cc_tweets, cc_info, by = "tweet_id")
 
 ```
 
@@ -123,11 +147,81 @@ From your new joined data, create a new tibble codeclan_hashtags containing only
 ```{r}
 
 codeclan_hashtags <- tweets_info %>% 
-  select(tweet_id, hashtags)
-
-codeclan_hashtags %>% 
+  select(tweet_id, hashtags) %>% 
   mutate(hashtags = str_to_lower(hashtags)) %>% 
   drop_na()
+
+codeclan_hashtags
+
+
+```
+
+# Extensions
+
+#Question 8
+
+Some tweets have more than one hashtag, denoted by the c( symbols at the start of the string. Use the str_sub() and str_detect() functions and your codeclan_hashtags tibble from above to find all the cases in which the hashtag string begins with charactersc(. 
+
+```{r}
+
+# use the str_sub function to get the first 2 letters of each tweet
+
+hashtags_multiple <- codeclan_hashtags %>% 
+  #mutate(first_letters = str_sub(hashtags, 1, 2)) %>% # This line is actually unnecessary
+  filter(str_detect(hashtags, "c\\("))
+
+hashtags_multiple
+```
+
+# Question 9
+
+Use the str_detect() function to find all tweets with text that mentions “Edinburgh”, and count how many such tweets there are. 
+
+```{r}
+
+# jamie method
+
+cc_tweets %>% 
+  filter(str_detect(str_to_lower(text), "edinburgh"))
+
+#returns the total list of tweets with edinburgh in it
+
+# answer from homework
+
+cc_tweets %>%
+  mutate(lowcase_tweets = str_to_lower(text)) %>%
+  filter(str_detect(lowcase_tweets, "edinburgh")) %>%
+  summarise(count = n())
+
+# returns the total number of tweets but that is all
+  
+```
+
+# Question 10
+
+Use str_extract_all() with a regular expression to find out which Twitter users CodeClan have been tweeting. 
+
+```{r}
+
+
+# Answer from homework
+
+user_pattern <- "@[a-zA-Z0-9_]+" 
+
+tweets <- cc_tweets %>% 
+  select(text)
+head(str_extract_all(tweets$text, user_pattern))
+
+
+# Method done by Dave
+
+cc_tweets %>%
+  select(text) %>%
+  mutate(user_tweeted = str_extract_all(text, "@[A-z0-9_]+")) %>%
+  unnest(cols = c(user_tweeted)) %>%
+  group_by(user_tweeted) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
 
 
 ```
