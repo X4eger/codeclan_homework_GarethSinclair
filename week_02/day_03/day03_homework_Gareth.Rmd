@@ -1,0 +1,170 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+ #Question 1.
+Find the weather forecast for the next three days online. Create a list of lists in which each inner list should be labelled with the name of the day of the week. Each inner list should contain named elements telling you the temperature, chance of rain and wind speed.
+
+# Weather Forecast Entries
+
+
+13th Temp - 17C / Rain - 0% / Wind - 5mph
+14th T17 / R5 / W5
+15th T15 / R41 / W13
+16th T20 / R38 / W9
+17th T21 / R3 / W8
+18th T20 / R22 / W6
+19th T14 / R19 / W4
+20th T14 / R2 / W4
+21st T15 / R5 / W5
+22nd T16 / R6 / W13
+23rd T17 / R57 / W13
+24th T18 / R56 / W8
+25th T15 / R64 / W17
+26th T15 / R6 / W13
+
+```{r}
+
+threeday_forecast <- list("Thursday" = list(temp = 17,
+                                           rain_chance = 0,
+                                           wind_speed = 5),
+                           "Friday" = list(temp = 15,
+                                          rain_chance = 5,
+                                          wind_speed = 5),
+                           "Saturday" = list(temp = 15,
+                                             rain_chance = 41,
+                                             wind_speed = 13)
+)
+
+```
+
+# Question 2.
+
+Using the list you’ve just made find:
+
+    The chance of rain tomorrow
+    The wind speed on the day after tomorrow
+    The temperature tomorrow.
+
+```{r}
+# Chance of rain tomorrow
+
+threeday_forecast$Thursday$rain_chance # 0% chance
+
+# The Wind speed on the day after tomorrow
+
+threeday_forecast$Friday$wind_speed # 5mph
+
+# The temperature tomorrow
+
+threeday_forecast$Thursday$temp # 17C
+
+```
+
+# Question 3
+
+Find a 14 day forecast online and create a matrix of the forecasts for temperature, where each week is one row and columns correspond to days.
+
+You will want to give a name to the matrix you create.
+
+```{r}
+
+fortnight_forecast <- matrix(data = c(17, 17, 15, 20, 21, 20, 14, 14, 15, 16, 17, 18, 15, 15), nrow = 2, ncol = 7)
+
+fortnight_forecast
+
+```
+
+# Question 4
+
+From the matrix you just made select:
+
+    The third day of the second week
+    The whole second week
+    The first, third and fifth days in both weeks.
+
+```{r}
+# The third day of the second week
+
+fortnight_forecast[2, 3] # 20 Degrees
+
+# The whole second week
+
+fortnight_forecast[2,]
+
+# The first, third and fifth days in both weeks
+
+fortnight_forecast[,c(1,3, 5)]
+
+```
+
+# Question 5
+
+Write a function that pre-appends “The answer is:” to any character input, while for numeric input, it either just returns the number for numbers less than 10, or divides the number by 10 for numbers greater than 10. For anything else return “Invalid input”.
+
+```{r}
+library(stringr)
+
+
+is_this_the_answer <- function(a){
+  if( is.character(a)){
+    
+    str_c("The answer is: ", a)
+    
+  } else{
+  if( a < 10){
+    
+      print(a)
+    
+  } else {
+      
+      if (a >= 10){
+      
+      print( a / 10)
+      
+      } else {
+
+      
+    print("Invalid input")
+        
+    }
+    
+    }
+  }
+}
+
+
+is_this_the_answer("The ducks in the pond are free")
+
+```
+
+# Question 6
+
+Write a function which checks if two vectors have the same elements.
+
+    If they have the same elements in the same order, return “Exactly the same”
+    If they have the same elements but in a different order, return “The same”
+    If they don’t have the same elements, return “Different”.
+
+Hints
+
+    You can check if two vectors have the same elements but in a different order by using sort to sort each vector first and then checking if they are equal.
+    Have a look at the all() function
+
+
+```{r}
+x <- c(3, 5, 10)
+
+y <- c(3, 10, 5)
+
+if( is.numeric(x) & is.numeric(y)){
+  print("The Same")
+} else {
+  all(sort(x) == sort(y))){
+  print("Exactly The Same")
+  }
+}
+```
+
