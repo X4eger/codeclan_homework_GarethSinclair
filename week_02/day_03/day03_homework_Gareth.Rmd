@@ -113,30 +113,51 @@ is_this_the_answer <- function(a){
     
     str_c("The answer is: ", a)
     
-  } else{
-  if( a < 10){
+  } 
+  
+  if( is.numeric(a) < 10){
     
-      print(a)
+    print(a)
     
   } else {
-      
-      if (a >= 10){
+    
+    if (a >= 10){
       
       print( a / 10)
       
-      } else {
-
-      
-    print("Invalid input")
-        
     }
     
-    }
   }
+  
+  return("Invalid input")
 }
 
 
-is_this_the_answer("The ducks in the pond are free")
+is_this_the_answer("A")
+
+
+
+
+# Different answer from the homework notes
+
+answer_or_divide <- function(x){
+  if (is.character(x)) {
+    return(paste("The answer is ", x))
+  }
+  
+  if (is.numeric(x)) {
+    if( x < 10) {
+      return(x)
+    } else{
+      return(x / 10)
+    }
+    }
+  return("Invalid input")
+}
+
+
+answer_or_divide(NA)
+
 
 ```
 
@@ -155,16 +176,83 @@ Hints
 
 
 ```{r}
-x <- c(3, 5, 10)
+x <- c(1, 2, 3, 4, 5)
 
-y <- c(3, 10, 5)
+y <- c(1, 4, 2, 3, 5)
+
+z <- c(9, 4, 8, 1, 0)
 
 if( is.numeric(x) & is.numeric(y)){
+  
   print("The Same")
+  
 } else {
-  all(sort(x) == sort(y))){
-  print("Exactly The Same")
+  
+  if(all(sort(x) == sort(y))){
+    print("Exactly The Same")
   }
 }
+
+
+
+
+# Correct Answer from homework
+
+
+is_same_vector <- function(vector_1, vector_2) {
+  if (all(vector_1 == vector_2)){
+    return("Exactly the same")
+  }
+  
+  if (all(sort(vector_1) == (sort(vector_2)))){
+    return("The same")
+  }
+  
+  return("Different")
+}
+
+# If they have the same elements in the same order, return “Exactly the same”
+
+is_same_vector(x, x)
+
+# If they have the same elements but in a different order, return “The same”
+
+is_same_vector(x, y)
+
+# If they don’t have the same elements, return “Different”.
+
+is_same_vector(x, z)
+
+
+
+```
+
+# Extension
+
+# Question 7
+
+Write code that prints a multiplication table for numbers up to 12. i.e. there will be 12 rows and 12 columns, and each element should be the row number multiplied by the column number.
+
+```{r}
+
+
+multi_table <- matrix( nrow = 12, ncol = 12)
+
+for(outer_factor in 1:12){
+  for(inner_factor in 1:12){
+    multi_table[outer_factor, inner_factor] = outer_factor * inner_factor
+  }
+}
+
+multi_table
+
+
+
+# Can also do this using matrix transpose and multiplication 
+
+times_table <- matrix(1:12) %*% t(matrix(1:12))
+
+times_table
+
 ```
 
