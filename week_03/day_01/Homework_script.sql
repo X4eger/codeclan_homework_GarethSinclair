@@ -111,7 +111,7 @@ LIMIT 1;
 SELECT count(first_name)
 FROM employees 
 WHERE first_name 
-    LIKE 'F%'
+    LIKE 'F%';
      
 /* Q12 */
     
@@ -120,7 +120,7 @@ WHERE first_name
 SELECT *
 FROM employees 
 WHERE email 
-    LIKE '%yahoo%'
+    LIKE '%yahoo%';
     
 /* Q13 */
     
@@ -130,7 +130,7 @@ WHERE email
 SELECT count(*)
 FROM employees 
 WHERE  country NOT IN ('France', 'Germany')
-AND pension_enrol IS TRUE
+AND pension_enrol IS TRUE;
      
 /* Q14 */
 
@@ -141,7 +141,7 @@ AND pension_enrol IS TRUE
 SELECT max(salary) AS max_fulltime_engineering_salary
 FROM employees 
 WHERE department = 'Engineering'
-AND fte_hours = 1.0
+AND fte_hours = 1.0;
      
 /* Q15 */
 
@@ -157,7 +157,7 @@ SELECT first_name,
        (fte_hours * salary) AS effective_yearly_salary
 FROM employees 
 WHERE fte_hours IS NOT NULL 
-AND salary IS NOT NULL
+AND salary IS NOT NULL;
 
 /* Extension */
 
@@ -174,9 +174,9 @@ AND salary IS NOT NULL
 SELECT 
     first_name || ' ' || last_name || ' - ' || department AS badge_label
 FROM employees
-WHERE  (first_name IS NOT NULL
+WHERE   first_name IS NOT NULL
     AND  last_name IS NOT NULL
-    AND  department IS NOT NULL)
+    AND  department IS NOT NULL;
 
 /* Q17 */
     
@@ -192,17 +192,17 @@ WHERE  (first_name IS NOT NULL
     
 SELECT 
     first_name || ' ' || 
-    last_name || ' - ' || 
+    last_name  || ' - ' || 
     department || ' (joined ' ||
     TO_CHAR(start_date, 'FMMonth, YYYY')
     ||    ')'
 AS badge_label
 FROM employees
 WHERE  
-    (first_name IS NOT NULL
+    first_name IS NOT NULL
     AND  last_name IS NOT NULL
     AND  department IS NOT NULL
-    AND start_date IS NOT NULL)
+    AND  start_date IS NOT NULL;
     
      
 /* Q18 */
@@ -223,7 +223,7 @@ SELECT first_name,
            ELSE 'No Salary Data'
        END
        AS salary_class
-FROM employees
+FROM employees;
       
 
 
