@@ -40,6 +40,16 @@ INNER JOIN teams AS t
 ON t.id = e.team_id
 WHERE CAST(t.charge_cost AS int) > 80;
 
+/* Another option from homework answers */
+
+SELECT 
+  e.first_name, 
+  e.last_name, 
+  t.name AS team_name
+FROM employees AS e INNER JOIN teams AS t
+ON e.team_id = t.id
+WHERE t.charge_cost::INT > 80; -- This is specific to PostgreSQL--
+
 /* Q2 */
 
 /* (a). Get a table of all employees details, together with their local_account_no and local_sort_code, if they have them.
@@ -166,7 +176,7 @@ HAVING CAST(t.charge_cost AS int) * count(e.id) > 5000;
  * How many of the employees serve on one or more committees?
  */
 
-SELECT COUNT(DISTINCT employee_id)
+SELECT COUNT(DISTINCT(employee_id))
 FROM employees_committees
 
 /* Q6 */
