@@ -104,13 +104,54 @@ GROUP BY country
 HAVING count(id) > 30
 ORDER BY avg_salary DESC;
 
+/* Q9 */
 
+/*  Return a table containing each employees first_name, 
+ *  last_name, full-time equivalent hours (fte_hours), 
+ *  salary, and a new column effective_yearly_salary 
+ *  which should contain fte_hours multiplied by salary. 
+ *  Return only rows where effective_yearly_salary is more than 30000.
+ */
 
+SELECT 
+    first_name,
+    last_name,
+    fte_hours,
+    salary,
+    (fte_hours * salary) AS effective_yearly_salary
+FROM employees
+WHERE ((fte_hours * salary) > 30000);
 
+/* Q10 */
 
+/* Find the details of all employees in either Data Team 1 or Data Team 2 */
 
+SELECT *
+FROM employees AS e
+LEFT JOIN teams AS t
+ON e.team_id = t.id
+WHERE t."name" = 'Data Team 1' OR 
+      t."name" = 'Data Team 2';
 
+  -- Without a Join -- 
+SELECT *
+FROM employees 
+WHERE team_id = '7' OR
+      team_id = '8'
+      
+/* Q11 */
+      
+/* Find the first name and last name of all employees who lack a local_tax_code. */
 
+SELECT 
+    e.first_name,
+    e.last_name
+FROM employees AS e
+LEFT JOIN pay_details AS pd 
+ON e.pay_detail_id = pd.id
+WHERE pd.local_tax_code IS NULL
+
+/* Q12 */
 
 
 
