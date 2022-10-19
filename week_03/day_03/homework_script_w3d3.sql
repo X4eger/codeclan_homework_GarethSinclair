@@ -137,7 +137,7 @@ WHERE t."name" = 'Data Team 1' OR
 SELECT *
 FROM employees 
 WHERE team_id = '7' OR
-      team_id = '8'
+      team_id = '8';
       
 /* Q11 */
       
@@ -149,13 +149,95 @@ SELECT
 FROM employees AS e
 LEFT JOIN pay_details AS pd 
 ON e.pay_detail_id = pd.id
-WHERE pd.local_tax_code IS NULL
+WHERE pd.local_tax_code IS NULL;
 
 /* Q12 */
 
+/*  The expected_profit of an employee is defined as (48 * 35 * charge_cost - salary) * fte_hours, 
+ *  where charge_cost depends upon the team to which the employee belongs. 
+ *  Get a table showing expected_profit for each employee.
+ */
+
+SELECT
+    concat(e.first_name, ' ', e.last_name) AS full_name,
+    t."name",
+    t.charge_cost,
+    e.fte_hours,
+    ((48 * 35 * CAST(t.charge_cost AS int) - e.salary) * e.fte_hours) AS expected_profit
+FROM employees AS e
+LEFT JOIN teams AS t
+ON e.team_id = t.id;
+
+/* Q13 */
+
+/* Find the first_name, last_name and salary of the lowest paid employee in 
+ * Japan who works the least common full-time equivalent hours across the corporation.”
+ */
+
+SELECT
+    first_name,
+    last_name,
+    salary
+FROM employees 
+WHERE country = 'Japan'
+AND fte_hours = (
+            SELECT 
+                fte_hours 
+                FROM employees 
+                GROUP BY fte_hours
+                ORDER BY count(id)
+                LIMIT 1
+)
+ORDER BY salary ASC NULLS LAST
+LIMIT 1;
+
+/* Q14 */
+
+/* Obtain a table showing any departments in which there are two or more 
+ * employees lacking a stored first name. Order the table in descending order 
+ * of the number of employees lacking a first name, 
+ * and then in alphabetical order by department.
+ */
+
+SELECT 
+    count(id) AS nameless_employees,
+    department
+FROM employees 
+WHERE first_name IS NULL
+GROUP BY department
+HAVING count(id) > 1
+ORDER BY nameless_employees DESC, department ASC;
+
+/* Q15 */
+
+/* Return a table of those employee first_names shared by more than one employee, 
+ * together with a count of the number of times each first_name occurs. 
+ * Omit employees without a stored first_name from the table. 
+ * Order the table descending by count, and then alphabetically by first_name.
+ */
+
+SELECT 
+    first_name,
+    count(id) AS n_employees
+FROM employees 
+WHERE first_name IS NOT NULL
+GROUP BY first_name
+HAVING count(id) > 1
+ORDER BY n_employees DESC, first_name ASC
 
 
+/* Q16 */
 
+/* Find the proportion of employees in each department who are grade 1. 
+ */
+
+SELECT
+    department,
+    grade,
+    count(grade),
+    sum()
+FROM employees
+GROUP BY department, grade
 
 
 
