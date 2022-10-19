@@ -231,13 +231,34 @@ ORDER BY n_employees DESC, first_name ASC
 /* Find the proportion of employees in each department who are grade 1. 
  */
 
-SELECT
+SELECT 
+    count(id),
     department,
-    grade,
-    count(grade),
-    sum()
+    grade
 FROM employees
 GROUP BY department, grade
+ORDER BY department
+
+
+SELECT
+    department,
+    count(id) AS n_employees,
+    count(grade <> 1) AS not_grade1,
+    count(grade = 1) AS grade1,
+    ((count(CAST(grade = 1 AS INT)) + count(CAST(grade <> 1 AS INT)) * 100) / (count(CAST(grade = 1 AS INT)))),
+    CAST(count(CAST(grade = 1 AS INT) / (count(id) * 100))) AS REAL
+FROM employees
+GROUP BY department
+ORDER BY department
+
+SELECT 
+    count(id),
+    department,
+    sum(grade),
+    count(CAST(grade = 1 AS INT) / count(id) * 100)
+FROM employees
+GROUP BY department
+ORDER BY department
 
 
 
