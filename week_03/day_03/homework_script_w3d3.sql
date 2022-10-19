@@ -27,9 +27,7 @@ ORDER BY department, last_name;
 
 /* Q3 */
 
-/*
- * Find the details of the top ten highest paid employees who have a last_name beginning with ‘A’.
- */
+/* Find the details of the top ten highest paid employees who have a last_name beginning with ‘A’.*/
 
 SELECT *
 FROM employees 
@@ -63,14 +61,48 @@ FROM employees
 GROUP BY department, fte_hours
 ORDER BY department, fte_hours;
 
+/* Q6 */
 
+/* Provide a breakdown of the numbers of employees enrolled, 
+ * not enrolled, and with unknown enrollment status in the corporation pension scheme.
+ */
 
+SELECT
+    pension_enrol,
+    count(id) AS n_employees
+FROM employees 
+GROUP BY pension_enrol;
 
+/* Q7 */
 
+/* Obtain the details for the employee with the highest salary in 
+ * the ‘Accounting’ department who is not enrolled in the pension scheme?
+ */
 
+SELECT *
+FROM employees 
+WHERE department = 'Accounting'
+AND pension_enrol IS FALSE
+ORDER BY salary DESC NULLS LAST
+LIMIT 1;
 
+/* Q8 */
 
+/* Get a table of country, number of employees in that country, 
+ * and the average salary of employees in that country for any 
+ * countries in which more than 30 employees are based. 
+ * 
+ * Order the table by average salary descending.
+ */
 
+SELECT 
+    country,
+    count(id) AS n_employees,
+    round(avg(salary), 2) AS avg_salary
+FROM employees
+GROUP BY country
+HAVING count(id) > 30
+ORDER BY avg_salary DESC;
 
 
 
