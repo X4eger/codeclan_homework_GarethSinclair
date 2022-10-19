@@ -237,30 +237,32 @@ SELECT
     grade
 FROM employees
 GROUP BY department, grade
-ORDER BY department
+ORDER BY department;
 
 
+-- Answer but created a sub query to "save progress" --
+WITH
+dep_grade1 AS (
+    SELECT
+        department,
+        count(id) AS emp_count,
+        sum(grade) AS grade_count
+    FROM employees 
+    GROUP BY department  
+)
 SELECT
     department,
-    count(id) AS n_employees,
-    count(grade <> 1) AS not_grade1,
-    count(grade = 1) AS grade1,
-    ((count(CAST(grade = 1 AS INT)) + count(CAST(grade <> 1 AS INT)) * 100) / (count(CAST(grade = 1 AS INT)))),
-    CAST(count(CAST(grade = 1 AS INT) / (count(id) * 100))) AS REAL
-FROM employees
-GROUP BY department
-ORDER BY department
+    round(CAST(grade_count AS REAL) / CAST(emp_count AS REAL) * 100) AS proportion_grade1
+FROM dep_grade1
+ORDER BY department;
 
+ -- Cleanest Answer --        
 SELECT 
-    count(id),
     department,
-    sum(grade),
-    count(CAST(grade = 1 AS INT) / count(id) * 100)
+    round(CAST(sum(grade) AS REAL) / CAST(count(id) AS REAL) * 100) AS proportion_grade1
 FROM employees
 GROUP BY department
-ORDER BY department
-
-
+ORDER BY department;
 
 
 
