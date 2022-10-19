@@ -1,0 +1,32 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+source("D:/CodeClan/Not a Repo/omni_credentials.R")
+
+```
+
+```{r}
+library(tidyverse)
+library(RPostgres)
+
+# Create a connection object using our credentials
+db_connection <- dbConnect(
+  drv = Postgres(),
+  host = "db-postgresql-lon1-20135-do-user-7581050-0.b.db.ondigitalocean.com",
+  port = 25061,
+  dbname = "omni_pool",
+  user = omni_username,
+  password = omni_password,
+  bigint = "numeric"
+)
+
+# rm() removes values from our environment
+rm(omni_password,
+   omni_username)
+
+dbDisconnect(conn = db_connection)
+```
+
