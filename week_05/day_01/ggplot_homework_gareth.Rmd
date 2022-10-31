@@ -119,9 +119,14 @@ Now the company wants to compare the number of steps that their device counts vs
 ```{r}
 
 qb_device_data %>%
-  mutate(time = (hours * 60) + mins) %>% 
+  mutate(time = hours + (mins/60)) %>% 
   ggplot(aes(x = time, y = counts, group = id, colour = device))+
   geom_line()+
+  labs(
+    title = "Steps versus devices",
+    x = "Duration in Hours",
+    y = "Number of Steps"
+  )+
   facet_wrap(~device) + 
    hw_theme+
   scale_fill_manual(values = col_scheme)
