@@ -13,6 +13,7 @@ output: html_notebook
 ```{r}
 library(CodeClanData)
 library(tidyverse)
+library(scales)
 
 
 ```
@@ -46,8 +47,9 @@ Make a line chart showing monthly sales of the "flagship product" - the 'KwikBit
 qb_monthly_sales %>% 
   filter(Cashflow == "Kwikbit Unit 1 Sales") %>% 
   ggplot(aes(x = Date, y = Amount))+
-  geom_line(colour = "#bd7040",
+  geom_line(colour = "#e89fe9",
             size = 1)+ 
+  geom_point(colour = "#b6a7b5")+
   labs(
     title = "Monthly sales of KwikBit Unit 1 over the last year",
     x = "Timeframe",
@@ -65,7 +67,11 @@ Make a line chart showing monthly revenue and costs over the last year. This dat
 qb_monthly_sales %>% 
   filter(Cashflow != "Kwikbit Unit 1 Sales") %>% 
   ggplot(aes(x = Date, y = Amount, group = Cashflow, colour = Cashflow)) +
-  geom_line() + 
+  geom_line() +
+  geom_point()+
+  labs(title = "Monthly revenue and costs",
+       x = "Timeframe",
+       y = "Total")+
    hw_theme
   
 ```
@@ -78,6 +84,11 @@ Show annual sales of personal fitness trackers over the last 5 years broken down
 qb_competitors %>% 
   ggplot(aes(x = Year, y = Revenue, fill = Company)) +
   geom_area()+
+  labs(
+    title = "Annual Sales of Competitors",
+    y = "Annual Sales Revenue(£)"
+  )+
+  scale_y_continuous(labels = comma)+
    hw_theme+
   scale_fill_manual(values = col_scheme)
 
@@ -93,6 +104,11 @@ qb_competitors %>%
   ggplot(aes(x = Year, y = Revenue, group = Company, colour = Company)) +
   geom_line()+
   geom_point() + 
+  labs(
+    title = "Annual sales of competitors",
+     y = "Annual sales Revenue(£)"
+  )+
+  scale_y_continuous(labels = comma)+
    hw_theme+
   scale_fill_manual(values = col_scheme)
 ```
