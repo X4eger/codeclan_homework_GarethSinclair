@@ -1,0 +1,45 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Advanced ggplot2 Homework
+
+## 1.1 Learning Objectives
+
+  - Practice making plots with ggplot2
+  - Create your own theme and use it with plots
+  
+```{r}
+library(CodeClanData)
+library(tidyverse)
+
+
+```
+# 2 MVP
+
+## 2.1 Part 1
+
+### Question 1 
+Take the data in the dataset qb_revenue_breakdown and make a stacked abr chart showing the sources of revenue across the two years in the dataset
+
+```{r}
+
+qb_revenue_breakdown %>% 
+  ggplot(aes(x = Product, y = Revenue, fill = Year)) +
+  geom_col()
+
+```
+
+### Question 2
+Make a line chart showing monthly sales of the "flagship product" - the 'KwikBit Unit 1' - over the last year. This data is inside qb_monthly_sales, but you will need to use filter or subset
+
+```{r}
+
+qb_monthly_sales %>% 
+  filter(Cashflow == "Kwikbit Unit 1 Sales") %>% 
+  arrange(Date) %>% 
+  ggplot(aes(x = Date, y = Amount))+
+  geom_line()
+```
+
