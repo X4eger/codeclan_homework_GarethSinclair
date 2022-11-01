@@ -18,7 +18,6 @@ library(CodeClanData)
 library(scales)
 library(ggplot2)
 
-windowsFonts("Arial" = windowsFont("Arial"))
 ```
 
 # 2 MVP
@@ -129,3 +128,54 @@ backpack %>%
 There is still no relationship between backpack weight and wearers weight,
 when looking at gender split there is more of a spread with females when they
 are compared next to males, however not enough to create a relationship. 
+
+##    Question 6
+What proportion of students report back pain?
+
+```{r}
+
+# As we know there are 100 rows this should be a nice number for %
+# assuming 1 = Yes and 0 = no
+backpack %>%
+  mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>% 
+  ggplot(aes(x = back_problems, 
+             y = after_stat(count/sum(count))))+
+  geom_bar(aes(fill = back_problems))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(
+    y = "Percentage of Students",
+    x = "Report of back pain"
+  ) +
+  scale_fill_manual(values = c("cornflowerblue", "darkorchid"))+
+  guides(fill = guide_legend(title = "Do you have \nback problems?"))
+  
+
+```
+As we can see from the above visualization, the majority of students don't 
+report having back issues, with the ones that do report having back problems being approx 32%
+
+
+##    Question 7
+is this proportion different between men and women?
+
+```{r}
+backpack %>%
+  mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>% 
+  ggplot(aes(x = back_problems, 
+             y = after_stat(count/sum(count)), group = sex))+
+  geom_bar(aes(fill = back_problems))+
+  scale_y_continuous(labels = scales::percent)+
+  facet_wrap(~sex)+
+  labs(
+    y = "Percentage of Students",
+    x = "Report of back pain"
+  ) +
+  scale_fill_manual(values = c("cornflowerblue", "darkorchid"))+
+  guides(fill = guide_legend(title = "Do you have \nback problems?"))
+
+# Why does this break my colour?
+
+```
+As we can see, the different of reported back pain is massively different 
+between men and women, far more women report having back pain than men. 
+Whether they are having it and not reporting it, remains to be seen...
