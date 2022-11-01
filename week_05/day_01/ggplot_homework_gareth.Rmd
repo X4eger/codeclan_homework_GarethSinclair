@@ -68,6 +68,7 @@ qb_monthly_sales %>%
   filter(Cashflow != "Kwikbit Unit 1 Sales") %>% 
   ggplot(aes(x = Date, y = Amount, group = Cashflow, colour = Cashflow)) +
   geom_line() +
+  scale_colour_manual(values = col_scheme) +
   geom_point()+
   labs(title = "Monthly revenue and costs",
        x = "Timeframe",
@@ -92,7 +93,16 @@ qb_competitors %>%
    hw_theme+
   scale_fill_manual(values = col_scheme)
 
-
+qb_competitors %>% 
+  ggplot(aes(x = Year, y = Revenue, fill = Company)) +
+  geom_col(position = "dodge")+
+  labs(
+    title = "Annual Sales of Competitors",
+    y = "Annual Sales Revenue(£)"
+  )+
+  scale_y_continuous(labels = comma)+
+   hw_theme+
+  scale_fill_manual(values = col_scheme)
 ```
 
 ### Question 5
@@ -101,7 +111,7 @@ Now show the sales from the four competitors as a line graph. Include an extra l
 ```{r}
 
 qb_competitors %>% 
-  ggplot(aes(x = Year, y = Revenue, group = Company, colour = Company)) +
+  ggplot(aes(x = Year, y = Revenue, colour = Company)) +
   geom_line()+
   geom_point() + 
   labs(
@@ -127,7 +137,7 @@ qb_device_data %>%
     x = "Duration in Hours",
     y = "Number of Steps"
   )+
-  facet_wrap(~device) + 
+  facet_grid(id~device) + 
    hw_theme+
   scale_fill_manual(values = col_scheme)
   
@@ -136,12 +146,10 @@ qb_device_data %>%
 
 ```{r}
 
-hwl <- list(col_scheme + hw_theme)
-
 hw_theme <- theme(
   panel.background = element_rect("white"),
   axis.line =  element_line("#50434F"),
-  panel.grid = element_line("#dcd5dc"),
+  panel.grid = element_line("#dcd5dc", linetype = "dashed"),
   text = element_text(size = 12),
   axis.text = element_text(size = 10),
   title = element_text(size = 14)
