@@ -137,10 +137,11 @@ What proportion of students report back pain?
 # As we know there are 100 rows this should be a nice number for %
 # assuming 1 = Yes and 0 = no
 backpack %>%
-  mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>% 
+ mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>% 
   ggplot(aes(x = back_problems, 
-             y = after_stat(count/sum(count))))+
-  geom_bar(aes(fill = back_problems))+
+             y = after_stat(count/sum(count)),
+             fill = back_problems))+
+  geom_bar()+
   scale_y_continuous(labels = scales::percent)+
   labs(
     y = "Percentage of Students",
@@ -162,16 +163,16 @@ is this proportion different between men and women?
 backpack %>%
   mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>% 
   ggplot(aes(x = back_problems, 
-             y = after_stat(count/sum(count)), group = sex))+
-  geom_bar(aes(fill = back_problems))+
+             y = after_stat(count/sum(count)), 
+             fill = back_problems))+
+  geom_bar()+
   scale_y_continuous(labels = scales::percent)+
-  facet_wrap(~sex)+
   labs(
     y = "Percentage of Students",
     x = "Report of back pain"
   ) +
-  scale_fill_manual(values = c("cornflowerblue", "darkorchid"))+
-  guides(fill = guide_legend(title = "Do you have \nback problems?"))
+  facet_wrap(~sex)+
+  scale_fill_manual(values = c("cornflowerblue", "darkorchid"))
 
 # Why does this break my colour?
 
@@ -209,8 +210,7 @@ backpack %>%
   mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>%
   filter(year != 0) %>% 
   ggplot(aes(x = back_problems,
-             y = after_stat(count/sum(count)),
-             group = year))+
+             y = after_stat(count/sum(count))))+
   geom_bar(aes(fill = back_problems))+
   scale_y_continuous(labels = scales::percent)+
   labs(
