@@ -174,7 +174,23 @@ backpack %>%
   facet_wrap(~sex)+
   scale_fill_manual(values = c("cornflowerblue", "darkorchid"))
 
-# Why does this break my colour?
+# Davids changes after class notes
+
+backpack %>%
+  mutate(
+    back_problems = ifelse(
+      back_problems == 1, "Yes", "No"
+      )
+  ) %>%
+  ggplot(
+    aes(x = sex, fill = back_problems))+
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values = c("Yes" =  "cornflowerblue", "No" = "darkorchid")) +
+  labs(
+    y = "Percentage of Students",
+    x = "Report of back pain"
+  )
 
 ```
 As we can see, the different of reported back pain is massively different 
