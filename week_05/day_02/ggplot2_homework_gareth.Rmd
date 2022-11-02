@@ -179,3 +179,48 @@ backpack %>%
 As we can see, the different of reported back pain is massively different 
 between men and women, far more women report having back pain than men. 
 Whether they are having it and not reporting it, remains to be seen...
+
+##    Question 8
+Now you’ve investigated your data separately, create plots to describe the relationship between backpack weight, body weight, gender and reported backpain.
+
+Try both backpack_weight and body_weight as well as the ratio.
+
+```{r}
+
+# ratio is backpack_weight / body_weight
+backpack %>% 
+  mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>%
+  ggplot(aes(x = body_weight, y = backpack_weight, group = sex, stat = back_problems))+
+  geom_point()+
+  facet_grid(back_problems~sex)
+  
+
+```
+I can't see any correlation between any of these, it is overall random...
+
+
+#   Extension
+
+## Question 1
+Does reported backpain differ across the year groups? Ignore year 0 in your data.
+
+```{r}
+backpack %>%
+  mutate(back_problems = ifelse(back_problems == 1, "Yes", "No")) %>%
+  filter(year != 0) %>% 
+  ggplot(aes(x = back_problems,
+             y = after_stat(count/sum(count)),
+             group = year))+
+  geom_bar(aes(fill = back_problems))+
+  scale_y_continuous(labels = scales::percent)+
+  labs(
+    y = "Percentage of Students",
+    x = "Report of back pain"
+  ) +
+  scale_fill_manual(values = c("cornflowerblue", "darkorchid"))+
+  guides(fill = guide_legend(title = "Do you have \nback problems?"))+
+  facet_wrap(~year)
+
+```
+Reported back problems differ depending on the year, those in years 3 and 4 
+having the highest percentage of back problems
