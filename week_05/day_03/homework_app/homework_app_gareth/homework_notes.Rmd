@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(scales)
+library(jpeg)
+
+stonks <- readJPEG("www/stonks.jpg")
+
+salary_data <- CodeClanData::salary
+
+```
+# First page plot
+```{r}
+
+salary_data %>% 
+   filter(job_area == "Sales") %>% 
+     filter(location == "Aberdeen") %>% 
+      ggplot()+
+      aes(x = location, y= salary, fill = job_area)+
+      geom_boxplot()+
+  labs(
+    x = "Where you want to live",
+    y = "How much you could make",
+  )+
+  scale_y_continuous(labels = scales::label_dollar(prefix = "£"))+
+  theme(
+    legend.position = "none"
+  )
+  
+```
+
+# Second page plot
+```{r}
+
+salary_data %>% 
+  group_by(location) %>% 
+  arrange(desc(salary)) %>% 
+  slice_head() %>%
+  ggplot(aes(x = reorder(location, -salary), y = salary, fill = job_area))+
+  geom_col()+
+  labs(
+    x = "Places to live",
+    y = "Potential Salary"
+  )+
+  scale_y_continuous(labels=scales::label_dollar(prefix = "£"))+
+  guides(fill = guide_legend(title = "Job Choice"))+
+  coord_flip()
+  
+```
+
