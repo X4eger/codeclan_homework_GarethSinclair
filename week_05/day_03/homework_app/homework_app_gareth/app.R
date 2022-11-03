@@ -3,12 +3,13 @@ library(tidyverse)
 library(bslib)
 library(scales)
 library(jpeg)
+library(ggpubr)
 
 
 salary_data <- CodeClanData::salary
 job_types <- unique(salary_data$job_area)
 job_location <- unique(salary_data$location)
-
+img <- readJPEG("www/stonks.jpg")
 
 ui <- fluidPage(
   theme = bs_theme(bootswatch = "vapor"),
@@ -88,7 +89,8 @@ server <- function(input, output) {
     group_by(location) %>% 
     arrange(desc(salary)) %>% 
     slice_head() %>% 
-    ggplot(aes(x = reorder(location, -salary), y = salary, fill = job_area))+
+    ggplot(aes(x = reorder(location, -salary), y = salary, fill = job_area, alpha = 0.5))+
+      background_image(img)+
     geom_col()+
     labs(
       x = "Places to live",
