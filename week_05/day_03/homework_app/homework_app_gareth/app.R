@@ -59,7 +59,7 @@ ui <- fluidPage(
                  height = 600,
                  width = 800)
     )
-    )
+  )
 )
 
 server <- function(input, output) {
@@ -86,19 +86,19 @@ server <- function(input, output) {
   
   output$tab2_plot <- renderPlot(
     salary_data %>% 
-    group_by(location) %>% 
-    arrange(desc(salary)) %>% 
-    slice_head() %>% 
-    ggplot(aes(x = reorder(location, -salary), y = salary, fill = job_area, alpha = 0.5))+
+      group_by(location) %>% 
+      arrange(desc(salary)) %>% 
+      slice_head() %>% 
+      ggplot(aes(x = reorder(location, -salary), y = salary, fill = job_area, alpha = 0.5))+
       background_image(img)+
-    geom_col()+
-    labs(
-      x = "Places to live",
-      y = "Potential Salary"
-    )+
-    scale_y_continuous(labels=scales::label_dollar(prefix = "£"))+
-    guides(fill = guide_legend(title = "Job Choice"))+
-    coord_flip()
+      geom_col()+
+      labs(
+        x = "Places to live",
+        y = "Potential Salary"
+      )+
+      scale_y_continuous(labels=scales::label_dollar(prefix = "£"))+
+      guides(fill = guide_legend(title = "Job Choice"))+
+      coord_flip()
   )
   
   observeEvent(input$honk, {
@@ -108,7 +108,7 @@ server <- function(input, output) {
                              type = "audio/wav", 
                              autoplay = NA,
                              controls = NA)
-             )
+    )
   }
   )
   
