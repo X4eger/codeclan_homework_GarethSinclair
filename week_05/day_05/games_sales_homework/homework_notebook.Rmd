@@ -4,6 +4,7 @@ output: html_notebook
 ---
 
 ```{r}
+install.packages("shinyWidgets")
 
 game_sales <- CodeClanData::game_sales
 

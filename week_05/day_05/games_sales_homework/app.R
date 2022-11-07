@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(bslib)
+library(shinyWidgets)
 
 game_sales <- CodeClanData::game_sales
 
@@ -29,43 +30,45 @@ ui <- fluidPage(
               sidebarLayout(
                 sidebarPanel(
                   
-                  selectInput(
+                  pickerInput(
                     inputId = "genreinput",
                     label = "Select a Genre",
-                    choices = genretypes %>% 
-                      append("All") %>% 
-                      sort(),
-                    selected = "All"
-                    ),
-                  selectInput(
+                    choices = genretypes,
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = "Sports"
+                  ),
+                  pickerInput(
                     inputId = "yearinput",
                     label = "Select a Year",
                     choices = years,
-                    selected = "2008"
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = 2006
                   ),
                   
-                  # selectInput(
-                  #   inputId = "publisherinput",
-                  #   label = "Select a Publisher",
-                  #   choices = publishers
-                  # 
-                  # ),
-                  # selectInput(
-                  #   inputId = "developerinput",
-                  #   label = "Select a Developer",
-                  #   choices = developers
-                  # ),
+                  selectInput(
+                    inputId = "publisherinput",
+                    label = "Select a Publisher",
+                    choices = publishers
+                    
+                  ),
+                  selectInput(
+                    inputId = "developerinput",
+                    label = "Select a Developer",
+                    choices = developers
+                  ),
                   selectInput(
                     inputId = "platforminput",
                     label = "Select a Platform",
                     choices = platforms,
                     selected = "PS3"
-                  ),
-                  selectInput(
-                    inputId = "scoresinput",
-                    label = "What metric to arrange by?",
-                    choices = c("Sales Figures" = "sales", "Critic Score" = "critic_score", "User Score" = "user_score")
-                  )
+                  )#,
+                  # selectInput(
+                  #   inputId = "scoresinput",
+                  #   label = "What metric to arrange by?",
+                  #   choices = c("Sales Figures" = "sales", "Critic Score" = "critic_score", "User Score" = "user_score")
+                  # )
                   # selectInput(
                   #   inputId = "ratingsinput",
                   #   label = "Select a content rating",
@@ -129,15 +132,9 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  # observe({
-  #   if("All" %in% input$genreinput)
-  #     selected_genres = genretypes
-  #     else
-  #       selected_genres = input$genreinput
-  #     updateSelectInput(session,
-  #                       "genreinput",
-  #                       selected = selected_genres)
-  # })
+  observe({
+    print(input$genreinput)
+  })
   
   # Ideally i wanted to be able to have an "all option for every category for 
   # easier filtering however was unable to achieve this.
@@ -146,14 +143,14 @@ server <- function(input, output, session) {
     
     CodeClanData::game_sales %>% 
       filter(genre == input$genreinput) %>% 
-      filter(year_of_release == input$yearinput) %>% 
+      # filter(year_of_release == input$yearinput) %>% 
       # filter(publisher == input$publisherinput) %>% 
       # filter(developer == input$developerinput) %>% 
       filter(platform == input$platforminput) %>%
       #filter(rating == input$ratingsinput) %>% 
-      arrange(desc(input$scoresinput)) %>% 
+      # arrange(desc(input$scoresinput)) %>% 
       head(10) %>% 
-      ggplot(aes(x = name, y = input$scoresinput)) +
+      ggplot(aes(x = name, y = reorder(input$scoresinput, input$scoresinput))) +
       ggtitle(
         paste0(
           "Top 10 ", input$genreinput," Games, based on ", input$scoresinput, "."))+
@@ -162,9 +159,6 @@ server <- function(input, output, session) {
            y = "Units sold, in millions")+
       coord_flip()
     
-    if (input$genreinput != "All"){
-      game_sales <- filter(game_sales, genre == input$genreinput)
-    }
   })
   # This plot was created with the idea of users being able to see the top 10
   # games sold by as many or as few categories as they want, being able to 
