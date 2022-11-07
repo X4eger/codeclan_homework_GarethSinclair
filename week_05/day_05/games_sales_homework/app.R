@@ -47,34 +47,44 @@ ui <- fluidPage(
                     selected = 2006
                   ),
                   
-                  selectInput(
+                  pickerInput(
                     inputId = "publisherinput",
                     label = "Select a Publisher",
-                    choices = publishers
-                    
+                    choices = publishers,
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = "Nintendo"
                   ),
-                  selectInput(
+                 pickerInput(
                     inputId = "developerinput",
                     label = "Select a Developer",
-                    choices = developers
+                    choices = developers,
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = "Nintendo"
                   ),
-                  selectInput(
+                  pickerInput(
                     inputId = "platforminput",
                     label = "Select a Platform",
                     choices = platforms,
-                    selected = "PS3"
-                  )#,
-                  # selectInput(
-                  #   inputId = "scoresinput",
-                  #   label = "What metric to arrange by?",
-                  #   choices = c("Sales Figures" = "sales", "Critic Score" = "critic_score", "User Score" = "user_score")
-                  # )
-                  # selectInput(
-                  #   inputId = "ratingsinput",
-                  #   label = "Select a content rating",
-                  #   choices = ratings
-                  #   
-                  # )
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = "Wii"
+                  ),
+                 pickerInput(
+                    inputId = "ratingsinput",
+                    label = "Select a content rating",
+                    choices = ratings,
+                    options = list(`actions-box` = TRUE),
+                    multiple = TRUE,
+                    selected = "E"
+                    
+                  ),
+                  radioButtons(
+                    inputId = "scoresinput",
+                    label = "What metric to arrange by?",
+                    choices = c("Sales Figures" = "sales", "Critic Score" = "critic_score", "User Score" = "user_score")
+                  )
                 ),
                 mainPanel(
                   plotOutput("top_tens_plot")
@@ -134,6 +144,11 @@ server <- function(input, output, session) {
   
   observe({
     print(input$genreinput)
+    print(input$yearinput)
+    print(input$publisherinput)
+    print(input$developerinput)
+    print(input$platforminput)
+    print(input$ratingsinput)
   })
   
   # Ideally i wanted to be able to have an "all option for every category for 
@@ -142,15 +157,16 @@ server <- function(input, output, session) {
   output$top_tens_plot <- renderPlot({
     
     CodeClanData::game_sales %>% 
-      filter(genre == input$genreinput) %>% 
-      # filter(year_of_release == input$yearinput) %>% 
-      # filter(publisher == input$publisherinput) %>% 
-      # filter(developer == input$developerinput) %>% 
-      filter(platform == input$platforminput) %>%
-      #filter(rating == input$ratingsinput) %>% 
+      filter(
+        genre == input$genreinput,
+        year_of_release == input$yearinput, 
+        publisher == input$publisherinput,
+        developer == input$developerinput,
+        platform == input$platforminput,
+        rating == input$ratingsinput) %>% 
       # arrange(desc(input$scoresinput)) %>% 
       head(10) %>% 
-      ggplot(aes(x = name, y = reorder(input$scoresinput, input$scoresinput))) +
+      ggplot(aes(x = name, y = input$scoresinput)) +
       ggtitle(
         paste0(
           "Top 10 ", input$genreinput," Games, based on ", input$scoresinput, "."))+
