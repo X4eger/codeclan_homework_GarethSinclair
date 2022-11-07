@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+game_sales <- CodeClanData::game_sales
+
+
+names(game_sales)
+
+```
+Looking at column names, would be good to be able to filter by:
+  - year, 
+  - genre, 
+  - publisher, 
+  - developer
+  - platform
+  
+Where you can see their sales data, scores, rating etc. 
+Multiple plots to be able to compare, ultimately looking for the top 10 
+of each category only? 
+
+Another option of sales figures over the years?
+
+An extra option could be comparing criticscore to user score, see if there is
+consistency. 
+
+Worth looking into having an "All" option
+
+## Make some plots. 
+
+### This one can be for filtering by genre
+```{r}
+game_sales %>% 
+  filter(genre == "Racing") %>% 
+  filter(year_of_release == "2007") %>% 
+  filter(publisher == "Nintendo") %>% 
+  filter(developer == "Nintendo") %>% 
+  filter(platform == "DS") %>% 
+  arrange(desc(sales)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = name, y = sales)) +
+  geom_col()+
+  labs(x = "Game Name",
+       y = "Units sold, in millions")+
+  coord_flip()
+
+
+```
+
+
+### A plot to display yearly sales from a specific publisher
+
+```{r}
+game_sales %>% 
+  filter(publisher == "Ubisoft") %>% 
+  ggplot(aes(x = year_of_release,
+             y = sales))+
+  geom_line()+
+  labs(
+    x = "Release Years",
+    y = "Units sold(millions)"
+  )
+
+game_sales %>% 
+  filter(publisher == "Ubisoft",
+         year_of_release == 2001:2005) %>% 
+  ggplot(aes(x = name, y = sales))+
+  geom_col()+
+  labs(x = "Game Name",
+       y = "Units sold (millions)")+
+  coord_flip()
+  
+  
+
+
+
+```
+
