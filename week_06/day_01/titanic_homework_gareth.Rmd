@@ -1,0 +1,137 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(gtools)
+library(janitor)
+
+source("/CodeClan/codeclan_work/week_06/day_01/prob.R")
+
+titanic_data <- read.csv("data/titanic.csv") %>% 
+  clean_names()
+
+titanic_classes <- unique(titanic_data$class)
+```
+
+```{r}
+passengers <- titanic_data %>% 
+  filter(class == c("1st", "2nd", "3rd"))
+
+crew <- titanic_data %>% 
+  filter(class != c("1st", "2nd", "3rd"))
+
+```
+
+```{r}
+crew_survived <- crew %>% 
+  filter(survived == "yes")
+
+passenger_survived <- passengers %>% 
+  filter(survived == "yes")
+
+prob_crew_survive <- nrow(crew_survived) / nrow(crew)
+# 30%
+
+prob_passenger_survived <- nrow(passenger_survived) / nrow(passengers)
+# 37% Chance
+
+# Passengers had a higher chance of survival even though more crew survived
+
+```
+
+#   1.2
+## Question 1
+### If I roll a six-sided dice once, what is the probabilty of getting a number 
+less than 5
+
+
+```{r}
+# 4 out of the 6 options are less than 5
+
+less_than_5_dice <- 4/6
+
+```
+
+## Question 2
+How many outcomes are there in the sample space of an experiment in which we
+toss three dice?
+
+```{r}
+
+q2_three_dice <- rolldie(3) %>% 
+  nrow()
+
+# 216 potential outcomes
+
+```
+
+## Question 3
+In an experiment where we roll four dice:
+
+```{r}
+# How many outcomes are in the event where the 
+# total of the four dice equals 5, 6, 7
+
+four_dice <- rolldie(4)
+
+four_dice <- four_dice %>% 
+  mutate(totals = X1+X2+X3+X4)
+  
+less_than_eight_totals <- four_dice %>% 
+  filter(totals == c(5:7))
+# 9  outcomes
+
+# What is the probability of this event?
+
+prob_less_than_eight_four_dice <- nrow(less_than_eight_totals) / nrow(four_dice)
+
+# 0.069 %
+
+```
+
+## Question 4
+Five chairs are placed in a row in a room, along with five people of differing height. The people sit down randomly on the chairs. What is the probability that they sit in order of decreasing height, left to right?
+
+# Fucking low as hell i assume
+
+```{r}
+heights_sample <- c("188", "176", "135", "194", "166")
+# There can be only one correct option for this, therefore it will be probability based on 1/ total possible combinations
+
+heights_combos <- permutations(5, 5, heights_sample)
+
+prob_height_order <- 1 / nrow(heights_combos)
+
+# 0.08% chance
+```
+
+## Question 5
+I roll six dice:
+```{r}
+# What is the probability i see the numbers 6,5,4,3,2,1 in order on the dice, left to right?
+s_six_dice <- rolldie(6)
+
+# as we know its a list of every possible combination, only one correct answer can exist
+
+prob_dice_order <- 100 * (1 / nrow(s_six_dice))
+# 0.002% chance
+
+# What is the probability i see one each of the numbers on the dice, regardless of order
+
+any_order_nums <- s_six_dice %>% 
+  mutate(pattern =  isin(., c("1", "2", "3", "4", "5", "6"))) %>% 
+  filter(pattern == TRUE)
+  
+prob_any_order_all <- nrow(any_order_nums) / nrow(s_six_dice)
+
+# 1.5% chance
+```
+
+# Question 6
+ If I draw a single card from a 52-card deck, and it is black, what is the probability that its suit is spades.
+ 
+  - Spades/Clubs are half the pack, if you are measuring what are the chances a black card is a spade, surely it would be 50/50 as all black cards are either spades or clubs and they have an equal amount?
+  - If you are measuring what is the chance of a card being drawn that is spades then it would be 1/4 as all cards are the same in a full deck? 
