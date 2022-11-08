@@ -18,10 +18,10 @@ titanic_classes <- unique(titanic_data$class)
 
 ```{r}
 passengers <- titanic_data %>% 
-  filter(class == c("1st", "2nd", "3rd"))
+  filter(class %in% c("1st", "2nd", "3rd"))
 
 crew <- titanic_data %>% 
-  filter(class != c("1st", "2nd", "3rd"))
+  filter(class %in% c("deck crew", "engineering crew", "restaurant staff", "victualling crew"))
 
 ```
 
@@ -33,7 +33,7 @@ passenger_survived <- passengers %>%
   filter(survived == "yes")
 
 prob_crew_survive <- nrow(crew_survived) / nrow(crew)
-# 30%
+# 23%
 
 prob_passenger_survived <- nrow(passenger_survived) / nrow(passengers)
 # 37% Chance
@@ -81,8 +81,8 @@ four_dice <- four_dice %>%
   mutate(totals = X1+X2+X3+X4)
   
 less_than_eight_totals <- four_dice %>% 
-  filter(totals == c(5:7))
-# 9  outcomes
+  filter(totals %in% c(5:7))
+# 34  outcomes
 
 # What is the probability of this event?
 
