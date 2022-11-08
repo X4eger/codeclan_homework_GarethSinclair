@@ -23,9 +23,6 @@ passengers <- titanic_data %>%
 crew <- titanic_data %>% 
   filter(class %in% c("deck crew", "engineering crew", "restaurant staff", "victualling crew"))
 
-```
-
-```{r}
 crew_survived <- crew %>% 
   filter(survived == "yes")
 
@@ -38,7 +35,7 @@ prob_crew_survive <- nrow(crew_survived) / nrow(crew)
 prob_passenger_survived <- nrow(passenger_survived) / nrow(passengers)
 # 37% Chance
 
-# Passengers had a higher chance of survival even though more crew survived
+# Passengers had a higher chance of survival
 
 ```
 
