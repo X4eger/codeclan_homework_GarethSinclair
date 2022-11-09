@@ -1,0 +1,72 @@
+---
+title: "Distributions Homework"
+output: html_notebook
+---
+
+#   MVP
+## Question 1
+
+Load the data, clean_names and explore
+
+```{r}
+library(janitor)
+library(tidyverse)
+
+phone_data <- read_csv("data/20190928-items.csv") %>% 
+  clean_names()
+
+names(phone_data)
+glimpse(phone_data)
+```
+
+## Question 2
+Find the brand with the highest numbers of phones in the dataset
+```{r}
+phone_data %>% 
+  group_by(brand) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+
+# Samsung has the most phones
+```
+
+## Question 3
+Plot the distribution of phone ratings as a probability density, overlaying a 
+fitted normal distribution. Do you think the normal distribution provides a good
+model of these ratings?
+
+```{r}
+
+samsung_phone_data <- phone_data %>% 
+  filter(brand == "Samsung")
+
+samsung_phone_data <- samsung_phone_data %>% 
+  select(rating, total_reviews)
+
+avg_samsung_rating <- samsung_phone_data %>% 
+  summarise(avg_rating = mean(rating))
+# I am aware that these could have just been mutated on but i decided to store
+# on their own
+sd_samsung_rating <- samsung_phone_data %>% 
+  summarise(sd_rating = sd(rating))
+
+samsung_phone_data %>% 
+  ggplot(aes(x = rating)) +
+  geom_histogram(aes(y = ..density..), col = "white") +
+  stat_function(
+    fun = dnorm,
+    args = list(
+      mean = avg_samsung_rating$avg_rating,
+      sd = sd_samsung_rating$sd_rating
+    ),
+    col = "seagreen",
+    size = 1.2
+  )
+
+
+# normal distribution looks good for these ratings as the curve overall matches 
+# the shape of the histogram
+
+```
+
