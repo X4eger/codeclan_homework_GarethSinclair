@@ -45,11 +45,13 @@ samsung_phone_data <- samsung_phone_data %>%
   select(rating, total_reviews)
 
 avg_samsung_rating <- samsung_phone_data %>% 
-  summarise(avg_rating = mean(rating))
+  summarise(avg_rating = mean(rating)) %>% 
+  pull()
 # I am aware that these could have just been mutated on but i decided to store
 # on their own
 sd_samsung_rating <- samsung_phone_data %>% 
-  summarise(sd_rating = sd(rating))
+  summarise(sd_rating = sd(rating)) %>% 
+  pull()
 
 samsung_phone_data %>% 
   ggplot(aes(x = rating)) +
@@ -57,8 +59,8 @@ samsung_phone_data %>%
   stat_function(
     fun = dnorm,
     args = list(
-      mean = avg_samsung_rating$avg_rating,
-      sd = sd_samsung_rating$sd_rating
+      mean = avg_samsung_rating,
+      sd = sd_samsung_rating
     ),
     col = "seagreen",
     size = 1.2
@@ -70,3 +72,46 @@ samsung_phone_data %>%
 
 ```
 
+## Question 4
+
+```{r}
+# Taken from notes
+
+# Calculating prorortions within one standard deviation of the mean
+
+samsung_phone_data %>% 
+  filter(
+    rating >= avg_samsung_rating - sd_samsung_rating) %>%
+  filter(
+    rating <= avg_samsung_rating + sd_samsung_rating) %>% 
+  summarise(prop_within_1sd = n() / nrow(samsung_phone_data)
+  )
+
+# Calculating proportions within two standard deviations of the mean
+
+samsung_phone_data %>% 
+  filter(
+    rating >= avg_samsung_rating - 2 * sd_samsung_rating) %>%
+  filter(
+    rating <= avg_samsung_rating + 2 * sd_samsung_rating) %>% 
+  summarise(prop_within_2sd = n() / nrow(samsung_phone_data)
+  )
+
+# Calculating proportions within three standard deviations of the mean
+
+samsung_phone_data %>% 
+  filter(
+    rating >= avg_samsung_rating - 3 * sd_samsung_rating) %>%
+  filter(
+    rating <= avg_samsung_rating + 3 * sd_samsung_rating) %>% 
+  summarise(prop_within_3sd = n() / nrow(samsung_phone_data)
+  )
+```
+
+## Summary from Notes
+
+For a normal distribution, expect 68% of values to fall within one standard deviation of the mean. Here, 79% of ratings are within this range, so our distribution is slightly too central.
+
+Adding another standard deviation to either side should increase the proportion of values by 27% to 95% overall in a normal distribution. Our distribution adds 13%, going to 92% overall, so there are too few values in the range from one- to two standard deviations.
+
+Finally, in a normal distribution, adding a further standard deviation to either side should increase the proportion of values by 4.7% to 99.7% overall. Our distribution adds 6% to 98%, so this is pretty close. 
