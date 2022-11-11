@@ -1,0 +1,111 @@
+---
+title: "CI_homework"
+output: html_notebook
+---
+```{r}
+library(infer)
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+
+ames_data <- read_csv("data/ames.csv") %>% clean_names()
+
+names(ames_data)
+glimpse(ames_data)
+head(ames_data)
+skimr::skim(ames_data)
+```
+
+##   Task 2
+Investigate the distribution of lot_area. Is the distribution roughly normal? 
+If not, what problems do you find?
+```{r}
+ames_data %>% 
+  ggplot(aes(x = lot_area))+
+  geom_histogram(col = "black")
+
+# Distribution is heavily skewed right, not normal, there is a an incrdibly long
+# tail with numerous individual high prices that are causing the skew
+```
+
+##    Task 3
+Compute and visualise a bootstrap sampling distribution for the mean(lot_area) 
+of the sold houses
+```{r}
+
+s_lot_data_200 <- ames_data %>% 
+  rep_sample_n(size = 200, replace = TRUE, reps = 5000) %>% 
+  summarise(
+    mean_lot_area = mean(lot_area)
+  )
+
+s_lot_data_200 %>% 
+  ggplot(aes(x = mean_lot_area))+
+  geom_histogram(col = "#FFFFFF")
+```
+
+##    Task 4
+Use your bootstrap distribution to calculate a 95% CI for mean(lot_area) and 
+visualise it on the distribution
+
+```{r}
+s_ci95 <- s_lot_data_200 %>% 
+  summarise(
+    lower_ci = quantile(mean_lot_area, probs = 0.025),
+    upper_ci = quantile(mean_lot_area, probs = 0.975)
+  )
+
+visual_sample <- ames_data %>% 
+  specify(response = lot_area) %>% 
+  generate(reps = 5000, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+
+vis_ci_95 <- visual_sample %>%
+  get_ci(level = 0.95, type = "percentile")
+  
+visual_sample %>% 
+  visualise(bins = 30) + 
+  shade_ci(endpoints = vis_ci_95)
+  
+```
+
+##    Task 5
+
+```{r}
+
+vis_ci_99 <- visual_sample %>%
+  get_ci(level = 0.99, type = "percentile")
+  
+visual_sample %>% 
+  visualise(bins = 30) + 
+  shade_ci(endpoints = vis_ci_99)
+
+
+# Much broader which makes sense as we are covering an extra 4% of the means with
+# this increase in the CI
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
