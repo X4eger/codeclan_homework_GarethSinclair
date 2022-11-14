@@ -1,0 +1,167 @@
+---
+title: "Hypothesis Testing"
+output: html_notebook
+---
+
+
+# Hypothesis Testing - Practical
+```{r}
+
+library(tidyverse)
+library(infer)
+sleep_data <- msleep
+
+```
+
+## Question 1
+```{r}
+names(msleep)
+glimpse(msleep)
+skimr::skim(msleep)
+```
+
+## Question 2
+
+```{r}
+mean_total_sleep <- mean(sleep_data$sleep_total)
+# Get the mean total sleep
+
+mean_total_sleep == 7
+# Check if the mean is the same as the jabberwockies
+
+# mean total sleep is 10.4 so differs from jabberwockies
+# ----------
+## Correct Answer from Notes:
+
+
+null_distribution <- sleep_data %>%
+  specify(response = sleep_total) %>%
+  hypothesize(null = "point", mu = 7) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+obs_stat <- sleep_data %>%
+  specify(response = sleep_total) %>%
+  calculate(stat = "mean")
+
+null_distribution %>%
+  visualise() +
+  shade_p_value(direction = "both", obs_stat = obs_stat)
+```
+## Question 3
+
+```{r}
+omni_sleep_data <- sleep_data%>% 
+  filter(vore == "omni") %>% 
+  summarise(mean_omni_sleep = mean(sleep_total))
+
+herb_sleep_data <- sleep_data %>% 
+  filter(vore == "herbi") %>% 
+  summarise(mean_herb_sleep = mean(sleep_total))
+
+# Omnivores sleep for on average 10.9 hours, whereas herbivores sleep on average for only 9.5 hours
+
+## Correct Answer from Notes: 
+
+null_distribution <- sleep_data %>%
+  filter(vore %in% c("omni", "herbi")) %>%
+  specify(sleep_total ~ vore) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 10000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("omni", "herbi"))
+
+obs_stat <- sleep_data %>%
+  filter(vore %in% c("omni", "herbi")) %>%
+  specify(sleep_total ~ vore) %>%
+  calculate(stat = "diff in means", order = c("omni", "herbi"))
+
+null_distribution %>%
+  visualise() +
+  shade_p_value(direction = "right", obs_stat = obs_stat)
+
+null_distribution %>%
+  get_p_value(direction = "right", obs_stat = obs_stat)
+
+```
+The p-value is equal to or greater than α, and so we fail to reject H0. There is insufficient evidence to conclude that omnivores sleep for significantly longer than herbivores on average. 
+
+
+## Question 4
+
+```{r}
+# conservation column has domesticated
+
+sleep_data %>% 
+  filter(conservation == "domesticated") %>% 
+  summarise(is_domesticated = nrow(.) / nrow(sleep_data))
+
+## Correct Answer from notes:
+
+
+#   We need to create a new is_domesticated variable for the analysis. Also
+#   want to drop the NAs because we can’t say whether these are
+#   domesticated or not, we don’t have the information.
+
+
+msleep_domesticated <- sleep_data %>%
+  mutate(is_domesticated = conservation == "domesticated") %>%
+  filter(!is.na(is_domesticated))
+
+null_distribution <- msleep_domesticated %>%
+  specify(response = is_domesticated, success = "TRUE") %>%
+  hypothesize(null = "point", p = 0.05) %>%
+  generate(reps = 10000, type = "draw") %>%
+  calculate(stat = "prop")
+
+obs_stat <- msleep_domesticated %>%
+  specify(response = is_domesticated, success = "TRUE") %>%
+  calculate(stat = "prop")
+
+null_distribution %>%
+  visualise() +
+  shade_p_value(direction = "right", obs_stat = obs_stat)
+
+#   The p-value is less than α, so we reject H0 and accept that the 
+#   proportion of domesticated animal types in the data is significantly
+#   greater than 5%
+# 
+#   Could also do this by bootstrapping a numerical flag: we should get
+#   reasonably similar results, but more quickly.
+
+
+msleep_domesticated_flag <- msleep %>%
+  mutate(domesticated_flag = if_else(conservation == "domesticated", 1, 0))
+
+null_distribution <- msleep_domesticated_flag %>%
+  specify(response = domesticated_flag) %>%
+  hypothesize(null = "point", mu = 0.05) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+null_distribution %>%
+  visualise() +
+  shade_p_value(direction = "right", obs_stat = obs_stat)
+
+```
+
+# 1.2 Hypothesis testing - Defining the hypothesis
+
+## Question 1
+
+I would use a bootstrap method on the 200 people sample to reach the equivalent of the population (30k) and then check what the proportion of that population had heard of the coffee shop. 
+
+This could be written as: 
+
+Ho >= 40%
+Ha < 40%
+
+## Question 2
+
+I would want to compare the CTR between group A and B, due to the nature of the testing i wouldn't want to bootstrap the data this time, however a permutation test would be more useful in this instance. 
+
+## Question 3
+
+I would want to plot all of the values and see where the median lies in comparison to the spread
+
+Ho =/= 145mm
+Ha == 145mm
