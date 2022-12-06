@@ -1,0 +1,85 @@
+---
+title: "Linear Regression Homework"
+output: html_notebook
+---
+
+# MVP 
+
+  - Load the data into a dataframe project
+  
+```{r Libraries}
+library(tidyverse)
+library(broom)
+library(modelr)
+library(ggfortify)
+
+proj_man_data <- read_csv("data/project_management.csv")
+
+
+```
+
+  - Plot the data, taking estimated_length as the independent variable and actual_length as the dependent variable.
+  
+```{r}
+proj_man_data %>% 
+  ggplot(aes(y = actual_length, x = estimated_length))+
+  geom_point()
+
+```
+
+- Calculate the correlation coefficient of estimated_length and actual_length and interpret the value you obtain. 
+
+```{r}
+
+cor(proj_man_data$estimated_length, proj_man_data$actual_length)
+
+# 0.8046597
+
+```
+
+  - Perform a simple linear regression using actual length as the dependent variable, and estimated length as the independent variable. Save the model object to a variable
+  
+```{r}
+
+model <- lm(formula = actual_length ~ estimated_length, data = proj_man_data)
+
+```
+  
+  - Interpret the regression coefficient of estimated_length 
+  (ie. Slope, gradient) you obtain from the model. How do you interpret 
+  the r2 value reported by the model?
+
+
+```{r}
+model
+
+tidy(model)
+glance(model)
+
+
+```
+The estimated length increases by 1.223 for every 1 of the actual length. 
+
+The r2 value reported by the model of 0.647 would show a good rate at which the model fits the data
+
+  - Is the relationship statistically significant? Remember, to assess this you 
+  need to check the p-value of the regression coefficient(or slope/gradient). 
+  But you should first check the regression diagnostic plots to see if the 
+  p-value will be reliable(don't worry about any outlier points you see in the
+  diagnostic plots, we'll return to them in the extension.)
+  
+```{r}
+
+autoplot(model)
+```
+
+Residuals vs Fitted, plot looks fine as it stays around 0 , only going out to -2.5.
+
+Normal Q-Q, plot looks fine as all of the points lie very clsoe to the line
+
+Scale-Location, plot looks fine as it is all above the x-axis with only minor fluctation
+
+Overall these show that the p-value should be reliable
+
+
+  

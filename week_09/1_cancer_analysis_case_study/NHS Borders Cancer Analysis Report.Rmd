@@ -1,0 +1,245 @@
+---
+title: "NHS Borders Cancer Analysis"
+output:
+  html_document:
+    df_print: paged
+---
+
+The Brief: 
+
+In order to help inform the planning for provision of cancer treatment services
+in NHS Borders, we would like to gain better understanding of the incidence of 
+cancer in NHS Borders.
+
+```{r Libraries and Formatting, echo=FALSE, message=FALSE, warning=FALSE}
+#Datasets and Libraries
+
+library(tidyverse)
+library(janitor)
+library(sf)
+library(scales)
+
+healthboards_data <- read_csv("data/opendata_inc9620_hb.csv") %>% 
+  clean_names()
+
+cancer_demographic_data <- read_csv("data/opendata_inc9620_scotland.csv") %>% 
+  clean_names()
+
+
+invisible(capture.output(hb_map <- st_read("data/SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp")))
+hb_map$HBName <- as.character(hb_map$HBName)
+hb_map$HBName <-  str_c("NHS ", hb_map$HBName)
+
+
+cancer_demographic_data <- cancer_demographic_data %>% 
+  pivot_longer(cols = starts_with("incidences_a"), 
+               names_to = "incidence_age_range",
+               names_prefix = c("incidences_age", "incidences_"),
+               values_to = "incidences_per_age_range") %>% 
+  pivot_longer(cols = starts_with("incidence_r"),
+               names_to = "incidence_rate_age",
+               names_prefix = "incidence_rate_age",
+               values_to = "incidence_rate_age_range")
+
+cancer_age_data <- cancer_demographic_data %>% 
+  select(cancer_site, sex, year, crude_rate, incidence_age_range, 
+         incidences_per_age_range, incidence_rate_age, incidence_rate_age_range)
+
+healthboards_data <- healthboards_data %>% 
+  select(hb, cancer_site, sex, year, incidences_all_ages, crude_rate) %>% 
+  mutate(hb = recode(hb, 
+                     S08000015 = "NHS Ayrshire and Arran",
+                     S08000016 = "NHS Borders",
+                     S08000017 = "NHS Dumfries and Galloway",
+                     S08000018 = "NHS Fife",
+                     S08000019 = "NHS Forth Valley",
+                     S08000020 = "NHS Grampian",
+                     S08000021 = "NHS Greater Glasgow and Clyde",
+                     S08000022 = "NHS Highland",
+                     S08000023 = "NHS Lanarkshire",
+                     S08000024 = "NHS Lothian",
+                     S08000025 = "NHS Orkney",
+                     S08000026 = "NHS Shetland",
+                     S08000027 = "NHS Tayside",
+                     S08000028 = "NHS Western Isles",
+                     S08000029 = "NHS Fife",
+                     S08000030 = "NHS Tayside",
+                     S08000031 = "NHS Greater Glasgow and Clyde",
+                     S08000032 = "NHS Lanarkshire"))
+
+cancer_by_region <- healthboards_data %>% 
+  filter(cancer_site == "All cancer types") %>% 
+  group_by(hb) %>%
+  mutate(total_cancer_incidences = sum(incidences_all_ages))
+
+hb_map$cancer_incidences <- cancer_by_region$total_cancer_incidences[match(hb_map$HBName, cancer_by_region$hb)]
+hb_map$crude_rate <- cancer_by_region$crude_rate[match(hb_map$HBName, cancer_by_region$hb)]
+
+options(scipen = 10)
+```
+
+
+From the brief the main areas I wanted to look at were:
+<details>
+<summary>  - How the borders compares with other healthboard regions</summary>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+hb_map %>% 
+  ggplot(aes(fill = cancer_incidences))+
+  geom_sf()+
+  theme_void()+
+  scale_fill_gradient2(
+    name = "Incidences"
+  )+
+  labs(
+    title = "Total cancer incidences by NHS Region"
+  )
+
+hb_map %>% 
+  ggplot(aes(fill = crude_rate))+
+  geom_sf()+
+  theme_void()+
+  scale_fill_gradient2(
+    name = "Crude Rate"
+  )+
+  labs(
+    title = "Crude rate of cancer incidences per 100,000 people"
+  )
+
+```
+
+Side note: Approx 110,200 people in NHS Borders compared with over 1,196,000 in 
+NHS Greater Glasgow & Clyde
+
+</details>  
+
+
+<details>
+<summary>  - Difference in cancer incidences across different demographics, including sex and age </summary>
+
+
+```{r echo=FALSE, fig.show='hold', warning=FALSE, out.width='50%'}
+
+healthboards_data %>% 
+  filter(cancer_site != "All cancer types",
+         hb == "NHS Borders",
+         sex == "Male") %>% 
+  group_by(cancer_site) %>%
+  mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  slice_max(n = 1, order_by = total_incidences, with_ties = FALSE) %>% 
+  arrange(desc(total_incidences)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = cancer_site, y = total_incidences, fill = sex))+
+  geom_col(fill = "darkgreen")+
+  guides(fill = guide_legend("none"))+
+  coord_flip()+
+  labs(
+    x = "Type of Cancer",
+    y = "Incidences",
+    title = "Male Cancer Incidences in the Borders"
+  )+
+  theme_classic()
+
+healthboards_data %>% 
+  filter(cancer_site != "All cancer types",
+         hb == "NHS Borders",
+         sex == "Female") %>% 
+  group_by(cancer_site) %>%
+  mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  slice_max(n = 1, order_by = total_incidences, with_ties = FALSE) %>% 
+  arrange(desc(total_incidences)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = cancer_site, y = total_incidences, fill = sex))+
+  geom_col(fill = "darkorchid")+
+  coord_flip()+
+  guides(fill = guide_legend("none"))+
+  labs(
+    x = "Type of Cancer",
+    y = "Incidences",
+    title = "Female Cancer Incidences in the Borders"
+  )+
+  theme_classic()
+```
+From the findings of most common types of cancer per gender in the borders, the 
+most common overall for both being skin cancer is clear. Unique cancers to each
+gender, such as prostate and cervix are clearly shown to be large contributors
+as well. 
+
+</details>
+
+
+<details>
+<summary>  - See how cancer incidences have changed over the years </summary>
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+healthboards_data %>% 
+  filter(hb == "NHS Borders",
+         cancer_site == "All cancer types",
+         sex != "All") %>%
+  ggplot(aes(x = year, colour = sex, y = incidences_all_ages))+
+  geom_line()+
+  labs(x = "Year",
+       y = "Incidences",
+       title = "Cancer Incidences in the Borders over the years")+
+  theme_classic()
+
+```
+
+Unfortunately, consistent increases over the years, spikes for females could be 
+related to regular checkups for cervical/breast cancer since the records began, 
+approx every 3 years. 
+
+Increase spikes for males could be related to marketing campaigns for getting
+checked occurring and encouraging men to actually get checked for cancer. 
+
+Consistent increase could be more to do with different kinds of cancer being 
+discovered as well as better technology discovering it. 
+
+
+
+```{r, echo = FALSE, warning=FALSE}
+
+cancer_age_data %>% 
+  group_by(incidence_age_range) %>%
+  filter(sex != "All",
+         incidence_age_range != "incidences_all_ages") %>% 
+  mutate(incidence_age_range = recode(incidence_age_range,
+                                      "5to9" = "05 to 09",
+                                      "90and_over" = "90 and over",
+                                      "85to89" = "85 to 89",
+                                      "80to84" = "80 to 84",
+                                      "75to79" = "70 to 79",
+                                      "70to74" = "70 to 74",
+                                      "65to69" = "65 to 69",
+                                      "60to64" = "60 to 64",
+                                      "55to59" = "55 to 59",
+                                      "50to54" = "50 to 54",
+                                      "45to49" = "45 to 49",
+                                      "40to44" = "40 to 44",
+                                      "35to39" = "35 to 39",
+                                      "30to34" = "30 to 34",
+                                      "25to29" = "25 to 29",
+                                      "20to24" = "20 to 24",
+                                      "15to19" = "15 to 19",
+                                      "10to14" = "10 to 14",
+                                      "_under5" = "00 to 04")) %>% 
+  ggplot(aes(x = incidence_age_range, y = incidences_per_age_range))+
+  geom_col()+
+  coord_flip()+
+  facet_wrap(~sex)+
+  theme_classic()+
+  labs(x = "Age Range",
+       y = "Incidences",
+       title = "Cancer Incidences by Age")
+```
+
+
+As for ages, it is clear that there is a significant increase of incidences 
+when reaching a certain age, with the spike for both genders coming between 70 
+and 79. 
+
+
+</details>
+

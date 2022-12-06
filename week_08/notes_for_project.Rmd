@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+
+covid_deprivation <- read_csv("/CodeClan/NHS_group_project/NHS_group_project/clean_data/daily_covid_deprivation.csv")
+
+covid_sex_age <- read_csv("/CodeClan/NHS_group_project/NHS_group_project/clean_data/daily_covid_sex_age.csv")
+
+covid_healthboards <- read_csv("/CodeClan/NHS_group_project/NHS_group_project/clean_data/daily_covid_health_board.csv")
+
+read_csv("/CodeClan/NHS_group_project/NHS_group_project/clean_data/nhs_speciality.csv")
+
+
+```
+
+# Covid Data
+
+```{r}
+
+glimpse(covid_healthboards)
+
+covid_healthboards <- covid_healthboards %>% 
+  mutate(year = year(date),
+         month = month(date, label = TRUE, abbr = TRUE),
+         date = str_c(year, " ", month)) %>% 
+  filter(hb_name != "Golden Jubilee National Hospital") %>% 
+select(hb, hb_name, date, daily_positive, cumulative_positive, daily_deaths, cumulative_deaths, crude_rate_deaths)
+
+covid_healthboards %>%
+  filter(hb_name == "Scotland") %>% 
+  group_by(date) %>% 
+  summarise(monthly_deaths = sum(daily_deaths)) %>% 
+  ggplot(aes(x = date, y = monthly_deaths, group = 1))+
+  geom_line()
+
+covid_healthboards %>%
+  filter(hb_name == "Scotland") %>% 
+  group_by(date) %>% 
+  summarise(monthly_cases = sum(daily_positive)) %>% 
+  ggplot(aes(x = date, y = monthly_cases, group = 1))+
+  geom_line()
+
+```
+
+# sex and age Covid data
+
+```{r}
+covid_sex_age
+
+```
+
+
+# Bed Occupancy graph
+
+```{r}
+
+bed_occupancy %>%
+ # filter(hb == "SB0801") %>% 
+  filter(location_name == "Scotland") %>% 
+  filter(specialty_name == "General Medicine") %>% 
+  ggplot(aes(x = quarter, y = percentage_occupancy, group = hb))+
+  geom_line()
+
+unique(bed_occupancy$quarter)
+# 2016 Q4 up to 2021 Q4
+
+```
+
+# Admissions graph
+
+```{r}
+bed_occupancy %>%
+ # filter(hb == "SB0801") %>% 
+  filter(location_name == "Scotland") %>% 
+  filter(specialty_name == "General Medicine") %>% 
+  ggplot(aes(x = quarter, y = , group = hb))+
+  geom_line()
+
+```
+
+# StaffBedHours graph
+
+```{r}
+
+bed_occupancy %>%
+ # filter(hb == "SB0801") %>% 
+  filter(location_name == "Scotland") %>% 
+  filter(specialty_name == "General Medicine") %>% 
+  ggplot(aes(x = quarter, y = all_staffed_beddays, group = hb))+
+  geom_line()
+```
