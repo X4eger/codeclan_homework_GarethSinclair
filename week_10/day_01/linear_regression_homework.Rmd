@@ -13,7 +13,7 @@ library(broom)
 library(modelr)
 library(ggfortify)
 
-proj_man_data <- read_csv("data/project_management.csv")
+proj_data <- read_csv("data/project_management.csv")
 
 
 ```
@@ -21,8 +21,8 @@ proj_man_data <- read_csv("data/project_management.csv")
   - Plot the data, taking estimated_length as the independent variable and actual_length as the dependent variable.
   
 ```{r}
-proj_man_data %>% 
-  ggplot(aes(y = actual_length, x = estimated_length))+
+proj_data %>% 
+  ggplot(aes(x = estimated_length, y = actual_length))+
   geom_point()
 
 ```
@@ -31,7 +31,7 @@ proj_man_data %>%
 
 ```{r}
 
-cor(proj_man_data$estimated_length, proj_man_data$actual_length)
+cor(proj_data$estimated_length, proj_data$actual_length)
 
 # 0.8046597
 
@@ -41,7 +41,7 @@ cor(proj_man_data$estimated_length, proj_man_data$actual_length)
   
 ```{r}
 
-model <- lm(formula = actual_length ~ estimated_length, data = proj_man_data)
+model <- lm(formula = actual_length ~ estimated_length, data = proj_data)
 
 ```
   
