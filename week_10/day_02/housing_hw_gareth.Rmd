@@ -8,9 +8,132 @@ library(tidyverse)
 library(janitor)
 library(ggfortify)
 library(GGally)
+# install.packages("raster")
+library(raster)
+library(leaflet)
 
 housing <- read_csv("data/housing_prices.csv")
 ```
+
+Notes: 
+
+  - What does one row represent? An aggregate of a district in California
+  - Some variables are raw sums, some are "stats", like averages
+  --> do some feature engineering  variable transformation to get more "stats" 
+      that are meaningful to me about these houses
+  
+Lets do some "feature engineering"
+  - The data set we start with is te "raw materials"
+  - We can use those to make more meaning, aid interpretation
+  
+```{r}
+
+housing <- housing %>% 
+  mutate(bedrooms_per_house = total_bedrooms / households,
+         rooms_per_house = total_rooms / households,
+         people_per_house = population / households,
+         bedrooms_per_person = bedrooms_per_house / people_per_house,
+         rooms_per_person = total_rooms / population,
+         bedrooms_per_room = total_bedrooms / total_rooms,
+         non_bedrooms_per_house = rooms_per_house - bedrooms_per_house,
+  )
+
+```
+
+ * Extra idea: start using long & lats to make more meaning
+ --> joining to external city coordinate data, creating labels, flags, or 
+     things like "distance to city"
+
+Let's explore the relationships between teh variables - what looks like 
+it influences price?
+
+```{r, message = FALSE, warning = FALSE}
+ggpairs1 <- housing %>% 
+  select(median_house_value,
+         housing_median_age,
+         median_income,
+         ocean_proximity) %>% 
+  ggpairs()
+
+ggpairs1
+
+ggpairs2 <- housing %>% 
+  select(median_house_value,
+         total_rooms,
+         rooms_per_house,
+         total_bedrooms,
+         bedrooms_per_house) %>% 
+  ggpairs()
+
+ggpairs2
+
+ggpairs3 <- housing %>% 
+  select(median_house_value,
+         households,
+         population,
+         people_per_house,
+         total_rooms,
+         rooms_per_house) %>% 
+  ggpairs()
+
+ggpairs3
+
+```
+
+```{r}
+
+raster_house_value <- rasterFromXYZ(housing %>% 
+  dplyr::select(longitude, latitude, median_house_value), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+
+raster_pop <- rasterFromXYZ(housing %>% 
+  dplyr::select(longitude, latitude, population), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+
+plot(raster)
+
+pal_pop <- colorNumeric(c("transparent", "red"), values(raster_pop),
+  na.color = "transparent")
+pal_house_value <- colorNumeric(c("yellow", "blue"), values(raster_house_value),
+  na.color = "transparent")
+
+leaflet() %>% 
+  addTiles() %>% 
+  addRasterImage(raster_house_value,
+                 colors = pal_house_value,
+                 opacity = 0.7) %>% 
+  addRasterImage(raster_pop,
+                 colors = pal_pop,
+                 opacity = 0.7)
+
+
+%>% 
+   addLegend(pal = pal_house_value, values = values(raster_house_value),
+    title = "House Values")
+
+
+```
+
+Log Transformations
+
+```{r}
+ggplot(housing, aes(x = median_income))+
+  geom_histogram()
+
+ggplot(housing, aes(x = log(median_income)))+
+  geom_histogram()
+
+ggplot(housing, aes(x = median_house_value))+
+  geom_histogram()
+
+ggplot(housing, aes(x = log(median_house_value)))+
+  geom_histogram()
+
+
+```
+
+
+
 
 # 1 MVP
 ## 1 Load the housing_prices.csv data set and undertake an initial exploration of the data
@@ -43,6 +166,12 @@ ggpairs(housing)
 ggpairs(housing[,c("total_rooms", "total_bedrooms")])
 
 # Really useful to reduce the size of the graph/speed of loading 
+
+# Alternate method by tidyverse methods:
+
+housing %>% 
+  select(total_bedrooms, total_rooms) %>% 
+  ggpairs()
 
 
 ```
