@@ -1,0 +1,146 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r Libraries}
+library(tidyverse)
+library(janitor)
+library(ggfortify)
+library(GGally)
+
+housing <- read_csv("data/housing_prices.csv")
+```
+
+# 1 MVP
+## 1 Load the housing_prices.csv data set and undertake an initial exploration of the data
+
+```{r}
+
+glimpse(housing)
+summary(housing)
+head(housing)
+
+housing %>% 
+  summarise(across(.fns = ~sum(is.na(.x))))
+
+# total bedrooms has all the NA values
+```
+
+##2 
+  We expect the total_rooms of houses to be strongly correlated 
+  with total_bedrooms. Use ggpairs() to investigate correlations between
+  these two variables
+  
+```{r, message = FALSE, warning = FALSE}
+
+ggpairs(housing)
+
+# correlation value: 0.934 *** VERY Strongly correlated
+
+# Notes from homework: 
+
+ggpairs(housing[,c("total_rooms", "total_bedrooms")])
+
+# Really useful to reduce the size of the graph/speed of loading 
+
+
+```
+  
+##3 So, we do find significant correlations. Let's drop total_bedrooms from 
+the dataset, and use only total_rooms going forward. 
+
+```{r}
+housing <- housing %>% 
+  select(-total_bedrooms)
+```
+
+##4
+We are interesting in developing a regression model for the median_house_value 
+of a house in terms of the possible predictor variables in the dataset.
+  1. Use ggpairs() to investigate correlations between median_house_value and
+     the predictors
+  2. Perform further ggplot visualisations of any significant correlations
+
+```{r, message = FALSE, warning = FALSE}
+#1 
+ggpairs(housing)
+
+
+#2 
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = total_rooms))+
+  geom_point()
+
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = ocean_proximity))+
+  geom_boxplot()
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = population))+
+  geom_point()
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = households))+
+  geom_point()
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = median_income))+
+  geom_point()+
+  geom_smooth(method = "lm", se = FALSE)
+
+housing %>% 
+  ggplot(aes(x = median_house_value, y = housing_median_age))+
+  geom_point()
+
+```
+
+##5 
+Shortly we may try a regression model to fit the categorical predictor ocean_proximity.
+Investigate the level of ocean_proximity predictos. 
+How many dummy variables do you expect to get from it?
+
+```{r}
+
+unique(housing$ocean_proximity)
+
+# We can get 4 dummy variables from this as there are 5 variables within ocean_proximity
+
+```
+
+##6 Start with simple linear regression. Regress median_house_value on median_income and check the regression diagnostics.
+
+```{r}
+
+lm1 <- lm(median_house_value ~ median_income, housing)
+
+lm1
+summary(lm1)
+
+autoplot(lm1)
+```
+
+##7 Add another predictor of your choice. Check your assumptions, diagnotstics, and interpret the model
+
+```{r}
+
+lm2 <- lm(median_house_value ~ median_income + total_rooms, housing)
+
+lm2
+summary(lm2)
+autoplot(lm2)
+```
+## Extension
+
+##8 Try adding an interaction between log(median_income) and your chosen categorical
+    predictor. Do you think this interaction term is statisticlaly justified?
+    
+```{r}
+
+
+
+
+```
+

@@ -35,6 +35,11 @@ cor(proj_data$estimated_length, proj_data$actual_length)
 
 # 0.8046597
 
+# Notes from answers = 
+
+proj_data %>% 
+  summarise(corr_coeff = cor(estimated_length, actual_length))
+
 ```
 
   - Perform a simple linear regression using actual length as the dependent variable, and estimated length as the independent variable. Save the model object to a variable
@@ -53,6 +58,7 @@ model <- lm(formula = actual_length ~ estimated_length, data = proj_data)
 ```{r}
 model
 
+summary(model)
 tidy(model)
 glance(model)
 
