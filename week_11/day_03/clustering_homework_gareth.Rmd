@@ -1,0 +1,150 @@
+---
+title: "clustering homework"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(cluster)
+library(factoextra)
+library(dendextend)
+library(broom)
+
+mall_data <- read_csv("data/mall_customers.csv") %>% 
+  clean_names()
+
+```
+
+```{r}
+
+glimpse(mall_data)
+skimr::skim(mall_data)
+head(mall_data)
+```
+Only 5 columns (4 of interest and one Unique identifier)
+
+Good demographic information for being able to target customers, age, gender, income and spending score is good. 
+
+More information about what spending score means would be nice. 
+
+annual income and spending score the main columns we will be using, they are fine as they are, don't need scaled as the income already is. 
+
+
+```{r}
+
+mall_subset <- mall_data %>% 
+  column_to_rownames("customer_id") %>% 
+  select(annual_income_k, spending_score_1_100)
+  
+mall_subset
+
+```
+```{r}
+mall_matrix <- mall_subset %>% 
+  select(annual_income_k) %>% 
+  dist(method = "euclidean")
+
+fviz_dist(mall_matrix)
+
+mall_kluster <- mall_matrix %>% 
+  hclust(method = "complete")
+
+plot(mall_kluster, cex = 0.1, hang = 0.1)
+
+mall_kluster <- kmeans(mall_subset,
+       centers = 4,
+       nstart = 25)
+
+tidy(mall_kluster)
+
+augment(mall_kluster, mall_subset)
+
+glance(mall_subset)
+
+```
+
+```{r}
+
+fviz_nbclust(mall_subset,
+             kmeans,
+             method = "wss",
+             nstart = 25)
+
+# 3 or 4 Clusters ?
+
+fviz_nbclust(mall_subset,
+             kmeans,
+             method = "gap_stat",
+             nstart = 25)
+# 5 Clusters ? 
+
+fviz_nbclust(mall_subset,
+             kmeans,
+             method = "silhouette",
+             nstart = 25)
+
+# 5 Clusters ?
+```
+Based on these initial visualizations, K-value of 5 is a good place to start
+
+```{r}
+
+
+mall_subset %>% 
+  ggplot()+
+    aes(x = annual_income_k, 
+             y = spending_score_1_100)+
+  geom_point()
+  
+```
+
+```{r}
+
+
+mall_kluster2 <- tibble(k = 1:10) %>% 
+  mutate(
+    klust = map(k, ~kmeans(x = mall_subset, centers = .x, nstart = 25)),
+    tidied = map(klust, tidy),
+    glanced = map(klust, glance),
+    augmented = map(klust, ~augment(.x, mall_subset))
+  )
+
+mall_kluster2 %>% 
+  unnest(augmented) %>% 
+  filter(k==5) %>% 
+  ggplot()+
+  aes(x = annual_income_k, y = spending_score_1_100, colour = .cluster)+
+  geom_point()
+```
+
+Clustering shows 5 distinct groups, this could be very useful and i believe is a good fit for the data, however without knowing more about what the spending score is based on i couldn't answer if this current clustering is a good fit for certain.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

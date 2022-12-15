@@ -1,0 +1,112 @@
+---
+title: "Avocado Pricing Model"
+output: html_notebook
+---
+
+```{r Libraries}
+options(scipen = 10)
+
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggfortify)
+library(GGally)
+
+avocados <- read_csv("data/avocado.csv") %>% 
+  clean_names() %>% 
+  select(-x1)
+```
+
+```{r}
+
+glimpse(avocados)
+```
+1. "x1" column is unique identifier for each entry, can be removed
+2. "date" column for week of record, can be used to add different columns and then removed
+3. "average_price" column, average selling price
+4. "total_volume" column, total number of avocados sold in the week from date column
+5. "PLU" columns, weight of volume of avocados in pounds
+6. "bags" columns, number of mixed, pre packaged, bags of avocados sold
+7. "type", conventional or organic avocados
+8. "year", year of record
+9. "region", region of record
+
+
+# Playing about with data
+```{r}
+
+
+
+unique(avocados$region)
+# Convert some region entries where possible into the larger areas to reduce number of buckets.
+# With this we can bring 54 regions down to 8, then from there potentially further? 
+
+# Main regions to be used that could be useful
+avocados %>% 
+  filter(region %in% c("TotalUS",
+                       "California", 
+                       "West", 
+                       "Plains", 
+                       "South Central", 
+                       "Southeast", 
+                       "Midsouth", 
+                       "Great Lakes", 
+                       "Northeast"))
+
+# add categorical column based on date to identify seasionality
+avocados %>% 
+  mutate(month = month(date, label = TRUE),
+         in_season = ifelse(month %in% c("Apr", "May", "Jun", "Jul", "Aug", "Sep"), TRUE, FALSE))
+
+ # Convert weight columns to KG because we aren't madmen
+avocados %>% 
+  mutate(x4046 = round(x4046 * 0.453592, 2),
+         x4225 = round(x4225 * 0.453592, 2),
+         x4770 = round(x4770 * 0.453592, 2))
+
+avocados %>% 
+  filter(region == "TotalUS")
+
+
+
+```
+
+
+# Initial plots to check out difference in type
+
+```{r}
+
+avocados %>% 
+  filter(region == "TotalUS") %>% 
+  ggplot(aes(x = average_price, y = total_volume, colour = type))+
+  geom_point()
+
+avocados %>% 
+  filter(region == "TotalUS") %>% 
+  ggplot(aes(x = average_price, y = log(total_volume), colour = type))+
+  geom_point()
+
+
+
+# Shows a clear difference between the pricing/volume and the type,
+# I would say that this shows that we should be looking at the data 
+# for both types sepererately. However the code can be used for both the same way
+
+```
+
+Using GGpairs to check how other factors impact the two types
+
+```{r, message=FALSE, warning=FALSE}
+
+
+avocados %>% 
+select(-date) %>% 
+    filter(region=="TotalUS") %>% 
+  ggpairs()
+
+# Initially from looking at ggpairs results, I would be wanting to try and 
+# combine bags and PLU scores into a single bucket for more useful comparison
+
+
+```
+
