@@ -1,0 +1,110 @@
+---
+title: "Text Mining Homework"
+output: html_notebook
+---
+
+Text Mining Homework
+
+# MVP
+
+Using the dataset austen_books() from the package janeastenr:
+  1. Find the most common words in both Pride & Prejudice and Sense & Sensibility
+  2. Find the most common words in both Pride & Prejudice and SEnse & Sensibility,         not including stop words
+  3. Find the most common sentiment words in both P & P and S & S
+  
+  
+```{r}
+library(tidytext)
+library(tidyverse)
+library(janeaustenr)
+```
+
+
+
+1. Find the most common words in both Pride & Prejudice and Sense & Sensibility
+
+```{r}
+
+austen_books <- janeaustenr::austen_books()
+
+austen_df <- austen_books %>% 
+  filter(book %in% c("Sense & Sensibility", "Pride & Prejudice")) %>% 
+  unnest_tokens(word, text)
+
+austen_df %>% 
+  group_by(book) %>% 
+  count(word, sort = TRUE)
+
+```
+
+2. Find the most common words in both Pride & Prejudice and Sense & sensibility, not including stop words
+
+```{r}
+austen_books <- janeaustenr::austen_books()
+
+austen_df <- austen_books %>% 
+  filter(book %in% c("Sense & Sensibility", "Pride & Prejudice")) %>% 
+  unnest_tokens(word, text)
+
+austen_df %>% 
+  anti_join(stop_words) %>% 
+  group_by(book) %>% 
+  count(word, sort = TRUE)
+
+
+```
+
+
+3. Find the most common sentiment words in both Pride & PRejudice and Sense & Sensibility
+
+```{r}
+
+austen_books <- janeaustenr::austen_books()
+
+austen_df <- austen_books %>% 
+  filter(book %in% c("Sense & Sensibility", "Pride & Prejudice")) %>% 
+  unnest_tokens(word, text)
+
+austen_df %>% 
+  inner_join(get_sentiments("nrc")) %>% 
+  group_by(book, sentiment) %>% 
+  count(sentiment, sort = TRUE)
+
+```
+
+# Extension 
+
+Taking the results above. Can you create a plot which visualises the differences between the books? 
+
+```{r}
+
+austen_df %>%
+  anti_join(stop_words) %>% 
+  inner_join(get_sentiments("nrc")) %>% 
+  group_by(book, sentiment) %>% 
+  count(sentiment) %>% 
+  ggplot()+
+  aes(x = sentiment, y = n, fill = book)+
+  geom_col(position = "dodge")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

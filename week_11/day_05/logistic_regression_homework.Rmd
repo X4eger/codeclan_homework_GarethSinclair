@@ -1,0 +1,113 @@
+---
+title: "Logistic Regression Homework"
+output: html_notebook
+---
+
+
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(janitor)
+library(GGally)
+library(modelr)
+
+oj_data <- read_csv("data/orange_juice.csv") %>% 
+  clean_names()
+
+oj_data
+
+```
+
+
+There is more CH purchases than MM so purchasing CH as logical seems best change
+
+
+```{r}
+
+
+oj_data_ch <- oj_data %>% 
+  mutate(purchase_ch = ifelse(purchase == "CH", TRUE, FALSE),
+         store7 = ifelse(store7 == "Yes", TRUE, FALSE)) %>% 
+  relocate(purchase_ch, .before = weekof_purchase)
+
+alias(purchase_ch ~ ., data = oj_data_ch)
+
+
+```
+
+Checking how list price dif impacts purchases
+
+```{r}
+
+oj_data_ch_logreg <- glm(purchase_ch ~ list_price_diff, 
+                         data = oj_data_ch, 
+                         family = binomial(link = "logit"))
+
+oj_data_ch_logreg
+
+oj_data %>%
+  distinct(list_price_diff) %>%
+  arrange(desc(list_price_diff))
+
+predict_price_diff_log <- tibble(list_price_diff = seq(from = 0.01, 
+                                            to = 0.44, 
+                                            by = 0.01)) %>%
+  add_predictions(oj_data_ch_logreg, type = "response")
+                        
+ggplot(oj_data_ch)+
+  geom_jitter(aes(x = list_price_diff, y = as.integer(purchase_ch)),
+              shape = 1,
+              position = position_jitter(h = 0.03, w = 0.03))+
+  geom_line(data = predict_price_diff_log, 
+            aes(x = list_price_diff, y = pred), 
+            col = "red")
+
+# Line is straight for some reason, check with a new variable to see how it changes
+
+```
+
+ check with price of CH to see how this impacts change
+ 
+```{r}
+
+oj_data_ch_sale_price_logreg <- glm(purchase_ch ~ sale_price_ch, 
+                         data = oj_data_ch, 
+                         family = binomial(link = "logit"))
+
+oj_data_ch_sale_price_logreg
+
+oj_data %>% 
+  distinct(sale_price_ch) %>% 
+  arrange(desc(sale_price_ch))
+
+predict_sale_price_log <- tibble(sale_price_ch = seq(1.39, 2.09, 0.01)) %>% 
+  add_predictions(oj_data_ch_sale_price_logreg, type = "response")
+
+ggplot(oj_data_ch) +
+  geom_jitter(aes(x = sale_price_ch, y = as.integer(purchase_ch)),
+              shape = 1,
+              position = position_jitter(h = 0.03, w = 0.03))+
+  geom_line(data = predict_sale_price_log,
+            aes(x = sale_price_ch, y = pred),
+            col = "red")
+```
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
