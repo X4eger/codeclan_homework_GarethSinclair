@@ -27,10 +27,16 @@ There is more CH purchases than MM so purchasing CH as logical seems best change
 
 oj_data_ch <- oj_data %>% 
   mutate(purchase_ch = ifelse(purchase == "CH", TRUE, FALSE),
-         store7 = ifelse(store7 == "Yes", TRUE, FALSE)) %>% 
-  relocate(purchase_ch, .before = weekof_purchase)
-
-alias(purchase_ch ~ ., data = oj_data_ch)
+         store7 = ifelse(store7 == "Yes", TRUE, FALSE),
+         special_ch = as.logical(special_ch),
+         special_mm = as.logical(special_mm),
+         store_id = as_factor(store_id),
+         store = as_factor(store)) %>% 
+  rename(week_of_purchase = weekof_purchase,
+         store_7 = store7) %>% 
+  relocate(purchase_ch, .before = week_of_purchase) %>%
+  select(-purchase)
+  
 
 
 ```
